@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" role="img" aria-label="Aetheria logo">
+  <defs>
+    <linearGradient id="aurora" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4FD1C5"/>
+      <stop offset="55%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#F472B6"/>
+    </linearGradient>
+  </defs>
+  <circle cx="80" cy="80" r="62" fill="none" stroke="url(#aurora)" stroke-opacity="0.18" stroke-width="1"/>
+  <g fill="none" stroke="url(#aurora)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M34 122 L80 30 L126 122"/>
+    <path d="M52 92 L108 92"/>
+  </g>
+  <circle cx="80" cy="18" r="4" fill="#F5C451"/>
+  <circle cx="142" cy="80" r="2.6" fill="#4FD1C5"/>
+</svg>

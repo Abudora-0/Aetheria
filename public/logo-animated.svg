@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" role="img" aria-label="Aetheria animated logo">
+  <defs>
+    <linearGradient id="aurora" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4FD1C5">
+        <animate attributeName="stop-color" values="#4FD1C5;#8B5CF6;#F472B6;#4FD1C5" dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="55%" stop-color="#8B5CF6">
+        <animate attributeName="stop-color" values="#8B5CF6;#F472B6;#4FD1C5;#8B5CF6" dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#F472B6">
+        <animate attributeName="stop-color" values="#F472B6;#4FD1C5;#8B5CF6;#F472B6" dur="8s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <circle cx="80" cy="80" r="62" fill="none" stroke="url(#aurora)" stroke-opacity="0.18" stroke-width="1"/>
+
+  <g fill="none" stroke="url(#aurora)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    <path d="M34 122 L80 30 L126 122" stroke-dasharray="240" stroke-dashoffset="240">
+      <animate attributeName="stroke-dashoffset" from="240" to="0" dur="1.9s" begin="0s" fill="freeze"/>
+    </path>
+    <path d="M52 92 L108 92" stroke-dasharray="60" stroke-dashoffset="60">
+      <animate attributeName="stroke-dashoffset" from="60" to="0" dur="0.7s" begin="1.5s" fill="freeze"/>
+    </path>
+  </g>
+
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="0 80 80" to="360 80 80" dur="9s" repeatCount="indefinite"/>
+    <circle cx="80" cy="18" r="4" fill="#F5C451" filter="url(#glow)"/>
+  </g>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="360 80 80" to="0 80 80" dur="14s" repeatCount="indefinite"/>
+    <circle cx="142" cy="80" r="2.6" fill="#4FD1C5" filter="url(#glow)"/>
+  </g>
+</svg>
