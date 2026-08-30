@@ -1,0 +1,291 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   Aetheria design tokens - "The Aether"
+   ========================================================================= */
+
+:root {
+  color-scheme: dark;
+
+  --aurora-teal: #4fd1c5;
+  --aurora-violet: #8b5cf6;
+  --aurora-magenta: #f472b6;
+  --aurora-gold: #f5c451;
+
+  --bg: #07080d;
+  --bg-raise: #0c0e16;
+  --bg-sink: #050609;
+  --surface: rgba(20, 23, 34, 0.72);
+  --surface-solid: #12151f;
+  --border: rgba(139, 130, 200, 0.16);
+  --border-strong: rgba(139, 130, 200, 0.34);
+
+  --foreground: #eef0fb;
+  --muted-foreground: #9aa0be;
+  --faint-foreground: #6a6f8f;
+
+  --danger: #ff6b81;
+  --success: #4fd1c5;
+  --warning: #f5c451;
+
+  --ring: rgba(139, 92, 246, 0.55);
+  --glow: 0 0 0 1px rgba(139, 92, 246, 0.2), 0 18px 60px -20px rgba(79, 209, 197, 0.35);
+
+  --font-display: var(--font-space-grotesk), "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-instrument-sans), "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace, monospace;
+
+  --aurora-gradient: linear-gradient(120deg, var(--aurora-teal), var(--aurora-violet) 48%, var(--aurora-magenta));
+  --shell-max: 1320px;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f5fc;
+  --bg-raise: #ffffff;
+  --bg-sink: #e8ebf7;
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-solid: #ffffff;
+  --border: rgba(76, 66, 140, 0.16);
+  --border-strong: rgba(76, 66, 140, 0.32);
+  --foreground: #16182a;
+  --muted-foreground: #565d82;
+  --faint-foreground: #8b91b3;
+  --glow: 0 0 0 1px rgba(139, 92, 246, 0.14), 0 18px 50px -24px rgba(139, 92, 246, 0.35);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-raise: var(--bg-raise);
+  --color-bg-sink: var(--bg-sink);
+  --color-surface: var(--surface-solid);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted-foreground);
+  --color-faint: var(--faint-foreground);
+  --color-teal: var(--aurora-teal);
+  --color-violet: var(--aurora-violet);
+  --color-magenta: var(--aurora-magenta);
+  --color-gold: var(--aurora-gold);
+  --color-danger: var(--danger);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+
+  --ease-aether: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =========================================================================
+   Base
+   ========================================================================= */
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+}
+
+body {
+  background: var(--bg);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--aurora-violet) 45%, transparent);
+  color: var(--foreground);
+}
+
+/* =========================================================================
+   Themed scrollbar
+   ========================================================================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--aurora-violet) 55%, transparent) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--aurora-teal), var(--aurora-violet) 50%, var(--aurora-magenta));
+  border-radius: 999px;
+  border: 2px solid var(--bg);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  border-width: 1px;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* =========================================================================
+   Focus, form controls
+   ========================================================================= */
+
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--ring);
+  border-radius: var(--radius-xs);
+}
+
+input, textarea, select, button {
+  font: inherit;
+  color: inherit;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--faint-foreground);
+}
+
+/* Themed native checkbox / range fallback */
+input[type="range"] {
+  accent-color: var(--aurora-violet);
+}
+
+/* =========================================================================
+   Utilities
+   ========================================================================= */
+
+.aurora-text {
+  background: var(--aurora-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.aurora-border {
+  position: relative;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-solid), var(--surface-solid)) padding-box,
+    var(--aurora-gradient) border-box;
+}
+
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--border);
+}
+
+.panel {
+  background: var(--bg-raise);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.hide-native-scroll {
+  scrollbar-width: none;
+}
+.hide-native-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* =========================================================================
+   Keyframes
+   ========================================================================= */
+
+@keyframes aether-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2%, -3%, 0) scale(1.05); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes aether-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes aether-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+@keyframes aether-trace {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes aether-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes aether-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.animate-rise {
+  animation: aether-rise 0.7s var(--ease-aether) both;
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--aurora-violet) 22%, transparent),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: aether-shimmer 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:root[data-reduce-motion="true"] *,
+:root[data-reduce-motion="true"] *::before,
+:root[data-reduce-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
