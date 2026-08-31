@@ -141,16 +141,19 @@ other keys from `.env.example` to enable Stripe, Cloudinary and each social netw
 1. Push this repo to GitHub and import it at [vercel.com/new](https://vercel.com/new).
 2. Add environment variables from `.env.example` as needed. `CRON_SECRET` is required in
    production, the rest are optional.
-3. Deploy. `vercel.json` registers three cron jobs:
+3. Deploy. `vercel.json` registers one daily cron that the Hobby plan allows:
 
    | Path | Schedule | Job |
    | --- | --- | --- |
-   | `/api/cron/publish` | `* * * * *` | claim and publish due signals |
-   | `/api/cron/refresh` | `0 * * * *` | refresh OAuth tokens near expiry |
-   | `/api/cron/metrics` | `0 */6 * * *` | pull fresh engagement snapshots |
+   | `/api/cron/tick` | `0 6 * * *` | publish due signals, refresh tokens, pull metrics |
 
-   On the Hobby plan, adjust the publish schedule to the allowed frequency or trigger the
-   worker from the Signal Queue.
+   For minute level scheduling, either upgrade to Pro and add finer crons, point a
+   free external scheduler (cron-job.org, a GitHub Actions schedule) at
+   `https://your-app/api/cron/publish?key=<CRON_SECRET>`, or use the "Run worker now"
+   button on the Signal Queue.
+
+   Individual endpoints stay available for that: `/api/cron/publish`,
+   `/api/cron/refresh`, `/api/cron/metrics`.
 
 ## Environment variables
 
