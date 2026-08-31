@@ -6,6 +6,16 @@ import { MotionPrefsProvider } from "@/components/system/motion-prefs";
 import { ToastProvider } from "@/components/ui/toast";
 import { APP_NAME, APP_TAGLINE } from "@/lib/constants";
 
+function siteUrl() {
+  const explicit = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  const vercel = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
+  try {
+    return new URL(explicit || vercel || "http://localhost:3000");
+  } catch {
+    return new URL("http://localhost:3000");
+  }
+}
+
 const display = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
@@ -25,7 +35,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  metadataBase: siteUrl(),
   title: {
     default: `${APP_NAME} - Automated Social Scheduling and Analytics`,
     template: `%s - ${APP_NAME}`,

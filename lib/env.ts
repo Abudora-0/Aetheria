@@ -10,8 +10,10 @@ function read(key: string): string | undefined {
   return value;
 }
 
+const vercelUrl = read("VERCEL_URL") ? `https://${read("VERCEL_URL")}` : undefined;
+
 export const env = {
-  appUrl: read("NEXT_PUBLIC_APP_URL") ?? "http://localhost:3000",
+  appUrl: read("NEXT_PUBLIC_APP_URL") ?? vercelUrl ?? "http://localhost:3000",
   nodeEnv: process.env.NODE_ENV ?? "development",
 
   // Data source. "auto" uses live when MONGODB_URI is present, demo otherwise.
