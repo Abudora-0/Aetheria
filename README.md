@@ -56,9 +56,10 @@ apps and each subsystem switches to live, one at a time.
 | **Token Vault** | OAuth tokens encrypted at rest with AES-256-GCM, refreshed automatically before they lapse |
 | **Billing Nebula** | Stripe checkout, the customer portal and a webhook driven subscription lifecycle, with a demo simulate path |
 
-Plus an animated aurora logo, a mouse reactive particle field, a themed control kit
-(scrollbar, odometers, dropdowns, sliders, an orrery date picker), a command palette and a
-global reduce motion switch.
+Plus the Pulse mark, concentric aurora rings rippling out from a solar core (it draws
+itself in on the route loader and pulses in the nav), a mouse reactive particle field, a
+themed control kit (scrollbar, odometers, dropdowns, sliders, an orrery date picker), a
+command palette and a global reduce motion switch.
 
 ## The analytics engine
 

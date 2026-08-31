@@ -7,19 +7,19 @@ import { cn } from "@/lib/utils";
 interface AetheriaMarkProps {
   size?: number;
   className?: string;
-  /** "idle" loops the pulse, "trace" draws the arcs outward once, "static" is frozen. */
+  /** "idle" loops the pulse, "trace" ripples the rings outward once, "static" is frozen. */
   mode?: "idle" | "trace" | "static";
 }
 
-const ARCS = [
-  { d: "M80 53 A 27 27 0 0 1 80 107", width: 8, base: 1 },
-  { d: "M80 35 A 45 45 0 0 1 80 125", width: 7, base: 0.6 },
-  { d: "M80 17 A 63 63 0 0 1 80 143", width: 6, base: 0.32 },
+const RINGS = [
+  { r: 22, width: 5, base: 0.85 },
+  { r: 38, width: 4, base: 0.46 },
+  { r: 54, width: 3.5, base: 0.24 },
 ];
 
 /**
- * The Aetheria mark: concentric arcs radiating from a solar core, a signal
- * propagating into the aether. Used in the nav (idle), the route loader
+ * The Aetheria mark: concentric rings rippling out from a solar core, a signal
+ * propagating evenly into the aether. Used in the nav (idle), the route loader
  * (trace) and as a still for icons.
  */
 export function AetheriaMark({ size = 40, className, mode = "idle" }: AetheriaMarkProps) {
@@ -54,47 +54,49 @@ export function AetheriaMark({ size = 40, className, mode = "idle" }: AetheriaMa
       {/* Expanding ping: a scaled group so no SVG geometry attribute animates. */}
       <motion.g
         style={{ transformOrigin: "80px 80px" }}
-        initial={{ scale: 0.3, opacity: 0 }}
-        animate={animate ? { scale: [0.3, 2.4], opacity: [0.45, 0] } : { opacity: 0 }}
-        transition={{ duration: 2.8, repeat: Infinity, ease: "easeOut" }}
+        initial={{ scale: 0.32, opacity: 0 }}
+        animate={animate ? { scale: [0.32, 2.6], opacity: [0.4, 0] } : { opacity: 0 }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeOut" }}
       >
-        <circle cx="80" cy="80" r="30" fill="none" stroke={`url(#aurora-${gid})`} strokeWidth="2" />
+        <circle cx="80" cy="80" r="22" fill="none" stroke={`url(#aurora-${gid})`} strokeWidth="2" />
       </motion.g>
 
-      <g fill="none" stroke={`url(#aurora-${gid})`} strokeLinecap="round" filter={`url(#glow-${gid})`}>
-        {ARCS.map((arc, i) => (
-          <motion.path
-            key={i}
-            d={arc.d}
-            strokeWidth={arc.width}
-            strokeDasharray={mode === "trace" ? 240 : undefined}
-            initial={
-              mode === "trace"
-                ? { strokeDashoffset: 240, opacity: arc.base }
-                : { opacity: arc.base }
-            }
-            animate={
-              mode === "trace"
-                ? { strokeDashoffset: 0, opacity: arc.base }
-                : animate
-                  ? { opacity: [arc.base * 0.5, arc.base, arc.base * 0.5] }
-                  : { opacity: arc.base }
-            }
-            transition={
-              mode === "trace"
-                ? { duration: 0.85, delay: i * 0.18, ease: [0.16, 1, 0.3, 1] }
-                : { duration: 3, repeat: Infinity, delay: i * 0.4, ease: "easeInOut" }
-            }
-          />
-        ))}
-      </g>
+      {RINGS.map((ring, i) => (
+        <motion.circle
+          key={i}
+          cx="80"
+          cy="80"
+          r={ring.r}
+          fill="none"
+          stroke={`url(#aurora-${gid})`}
+          strokeWidth={ring.width}
+          strokeLinecap="round"
+          filter={`url(#glow-${gid})`}
+          style={{ transformOrigin: "80px 80px" }}
+          initial={
+            mode === "trace" ? { scale: 0, opacity: 0 } : { scale: 1, opacity: ring.base }
+          }
+          animate={
+            mode === "trace"
+              ? { scale: 1, opacity: ring.base }
+              : animate
+                ? { scale: 1, opacity: [ring.base * 0.55, ring.base, ring.base * 0.55] }
+                : { scale: 1, opacity: ring.base }
+          }
+          transition={
+            mode === "trace"
+              ? { duration: 0.7, delay: i * 0.16, ease: [0.16, 1, 0.3, 1] }
+              : { duration: 3.2, repeat: Infinity, delay: i * 0.35, ease: "easeInOut" }
+          }
+        />
+      ))}
 
       <motion.g
         style={{ transformOrigin: "80px 80px" }}
-        animate={animate ? { scale: [1, 1.18, 1] } : undefined}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        animate={animate ? { scale: [1, 1.16, 1] } : undefined}
+        transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
       >
-        <circle cx="80" cy="80" r="8" fill="var(--aurora-gold)" filter={`url(#glow-${gid})`} />
+        <circle cx="80" cy="80" r="7.5" fill="var(--aurora-gold)" filter={`url(#glow-${gid})`} />
       </motion.g>
     </svg>
   );
