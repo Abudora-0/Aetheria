@@ -49,3 +49,6 @@ CLAUDE.md
 
 # local editor / agent config
 .claude/
+
+# local secrets scratch file - never commit
+variables.txt
