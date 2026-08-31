@@ -8,8 +8,8 @@ import type {
   SessionUser,
   SubscriptionRecord,
 } from "@/lib/types";
-import type { DataPort, PostDraftInput } from "@/lib/data/ports";
-import { encryptToken } from "@/lib/crypto";
+import type { DataPort, HydratedAccount, PostDraftInput } from "@/lib/data/ports";
+import { decryptToken, encryptToken } from "@/lib/crypto";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -47,6 +47,21 @@ function toAccount(doc: any): AccountRecord {
     lastRefreshedAt: doc.lastRefreshedAt ? doc.lastRefreshedAt.toISOString() : null,
     status: doc.status ?? accountStatus(doc.tokenExpiresAt),
   };
+}
+
+function toHydratedAccount(doc: any): HydratedAccount {
+  const record = toAccount(doc) as HydratedAccount;
+  if (doc.accessTokenCipher) {
+    try {
+      record.tokens = {
+        accessToken: decryptToken(doc.accessTokenCipher),
+        refreshToken: doc.refreshTokenCipher ? decryptToken(doc.refreshTokenCipher) : undefined,
+      };
+    } catch {
+      /* token unreadable, adapter will fall back or fail cleanly */
+    }
+  }
+  return record;
 }
 
 function toPost(doc: any): PostRecord {
@@ -158,50 +173,66 @@ export const livePort: DataPort = {
       const docs = await Account.find({ userId }).sort({ network: 1 }).lean();
       return docs.map(toAccount);
     },
-    async connect(userId, network) {
+    async connect(userId, network, tokens) {
       await connectToDatabase();
       const meta = NETWORKS[network as NetworkId];
+      const now = Date.now();
+      const set: Record<string, unknown> = {
+        lastRefreshedAt: new Date(),
+        status: "healthy",
+      };
+      if (tokens) {
+        set.accessTokenCipher = encryptToken(tokens.accessToken);
+        set.refreshTokenCipher = tokens.refreshToken
+          ? encryptToken(tokens.refreshToken)
+          : null;
+        set.tokenExpiresAt = new Date(now + tokens.expiresIn * 1000);
+        if (tokens.handle) set.handle = tokens.handle;
+        if (tokens.displayName) set.displayName = tokens.displayName;
+      } else {
+        // Sandbox connection: no real OAuth app configured.
+        set.accessTokenCipher = encryptToken(`sandbox-access-${network}-${now}`);
+        set.refreshTokenCipher = encryptToken(`sandbox-refresh-${network}-${now}`);
+        set.tokenExpiresAt = new Date(now + 55 * DAY);
+      }
       const doc = await Account.findOneAndUpdate(
         { userId, network },
         {
           $setOnInsert: {
             userId,
             network,
-            handle: "you",
-            displayName: "Your channel",
+            handle: tokens?.handle ?? "you",
+            displayName: tokens?.displayName ?? "Your channel",
             avatarColor: meta.accent,
             followers: 120 + Math.floor(Math.random() * 900),
           },
-          $set: {
-            accessTokenCipher: encryptToken(`demo-access-${network}-${Date.now()}`),
-            refreshTokenCipher: encryptToken(`demo-refresh-${network}-${Date.now()}`),
-            tokenExpiresAt: new Date(Date.now() + 55 * DAY),
-            lastRefreshedAt: new Date(),
-            status: "healthy",
-          },
+          $set: set,
         },
         { upsert: true, new: true },
       ).lean();
       return toAccount(doc);
     },
+    async forPublishing(userId) {
+      await connectToDatabase();
+      const docs = await Account.find({ userId }).lean();
+      return docs.map(toHydratedAccount);
+    },
     async disconnect(userId, accountId) {
       await connectToDatabase();
       await Account.deleteOne({ _id: accountId, userId });
     },
-    async refresh(userId, accountId) {
+    async refresh(userId, accountId, tokens) {
       await connectToDatabase();
-      const doc = await Account.findOneAndUpdate(
-        { _id: accountId, userId },
-        {
-          $set: {
-            tokenExpiresAt: new Date(Date.now() + 55 * DAY),
-            lastRefreshedAt: new Date(),
-            status: "healthy",
-            accessTokenCipher: encryptToken(`demo-access-refreshed-${Date.now()}`),
-          },
-        },
-        { new: true },
-      ).lean();
+      const now = Date.now();
+      const set: Record<string, unknown> = { lastRefreshedAt: new Date(), status: "healthy" };
+      if (tokens) {
+        set.accessTokenCipher = encryptToken(tokens.accessToken);
+        if (tokens.refreshToken) set.refreshTokenCipher = encryptToken(tokens.refreshToken);
+        set.tokenExpiresAt = new Date(now + tokens.expiresIn * 1000);
+      } else {
+        set.tokenExpiresAt = new Date(now + 55 * DAY);
+      }
+      const doc = await Account.findOneAndUpdate({ _id: accountId, userId }, { $set: set }, { new: true }).lean();
       if (!doc) throw new Error("Account not found");
       return toAccount(doc);
     },
@@ -212,7 +243,7 @@ export const livePort: DataPort = {
         status: { $ne: "revoked" },
         tokenExpiresAt: { $lt: cutoff },
       }).lean();
-      return docs.map(toAccount);
+      return docs.map(toHydratedAccount);
     },
   },
 

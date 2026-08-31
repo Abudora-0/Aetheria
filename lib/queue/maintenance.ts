@@ -13,10 +13,12 @@ export async function runTokenRefresh() {
   for (const account of expiring) {
     try {
       const adapter = getAdapter(account.network as NetworkId);
-      if (adapter.live) {
-        await adapter.refreshToken(account);
+      if (adapter.live && account.tokens?.refreshToken) {
+        const next = await adapter.refreshToken(account);
+        await data.accounts.refresh(account.userId, account.id, next);
+      } else {
+        await data.accounts.refresh(account.userId, account.id);
       }
-      await data.accounts.refresh(account.userId, account.id);
       refreshed.push(`${account.network}:${account.handle}`);
     } catch (err) {
       failed.push(`${account.network}: ${err instanceof Error ? err.message : "error"}`);

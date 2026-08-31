@@ -1,6 +1,6 @@
 import type { NetworkId } from "@/lib/constants";
 import { seededRandom } from "@/lib/utils";
-import type { SocialAdapter, PublishOutcome, PublishPayload, MetricPull } from "@/lib/social/types";
+import type { MetricPull, PublishOutcome, PublishPayload, SocialAdapter } from "@/lib/social/types";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -22,22 +22,28 @@ export function createMockAdapter(id: NetworkId): SocialAdapter {
   return {
     id,
     live: false,
-    async publish({ body, account }: PublishPayload): Promise<PublishOutcome> {
+    async publish({ body, media, account }: PublishPayload): Promise<PublishOutcome> {
       await new Promise((r) => setTimeout(r, 120));
       if (body.includes("FORCE_FAIL")) {
-        return { ok: false, remoteId: null, permalink: null, message: `${id} rejected the post (forced failure)` };
+        return {
+          ok: false,
+          remoteId: null,
+          permalink: null,
+          message: `${id} rejected the post (forced failure)`,
+        };
       }
       const remoteId = `${id}_${hash(body + account.id).toString(36)}`;
+      const withMedia = media.length ? ` with ${media.length} attachment${media.length === 1 ? "" : "s"}` : "";
       return {
         ok: true,
         remoteId,
         permalink: `https://${id}.example/${account.handle}/${remoteId}`,
-        message: "Published via mock adapter",
+        message: `Published via sandbox adapter${withMedia}`,
       };
     },
     async refreshToken() {
       await new Promise((r) => setTimeout(r, 60));
-      return { expiresAt: new Date(Date.now() + 55 * DAY).toISOString() };
+      return { accessToken: `sandbox-${id}-${Date.now()}`, expiresIn: (55 * DAY) / 1000 };
     },
     async fetchMetrics(remoteId: string): Promise<MetricPull> {
       const rand = seededRandom(hash(remoteId));

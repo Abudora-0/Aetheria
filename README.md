@@ -62,7 +62,7 @@ apps and each subsystem switches to live, one at a time.
 | **Optimal Time Halo** | Golden posting windows computed from your own engagement history, overlaid on the composer |
 | **Signal Queue** | Every upcoming auto publish with a live countdown, status pulse, retry and cancel |
 | **Aurora Analytics** | Impression growth with a 7 day moving average, engagement rate per network, a 7 x 24 timing heatmap and a cadence score |
-| **Token Vault** | OAuth tokens encrypted at rest with AES-256-GCM, refreshed automatically before they lapse |
+| **Token Vault** | Real OAuth 2.0 connect flow (PKCE, signed state) per network, tokens encrypted at rest with AES-256-GCM and refreshed automatically before they lapse |
 | **Billing Nebula** | Stripe checkout, the customer portal and a webhook driven subscription lifecycle, with a demo simulate path |
 
 Plus the Pulse mark, concentric aurora rings rippling out from a solar core (it draws
@@ -175,7 +175,11 @@ other keys from `.env.example` to enable Stripe, Cloudinary and each social netw
 | `CRON_SECRET` | authorizes Vercel Cron calls | cron open in dev, blocked in prod |
 | `CLOUDINARY_*` | media uploads | deterministic placeholder images |
 | `STRIPE_*` | billing | the simulate billing path |
-| `<NETWORK>_CLIENT_ID` / `_SECRET` | live OAuth and publishing | a sandbox adapter per network |
+| `<NETWORK>_CLIENT_ID` / `_SECRET` | live OAuth and publishing | a sandbox channel per network |
+
+When a network's credentials are set, "Connect" on the Token Vault runs the real OAuth
+2.0 flow. Register each app with the callback URL
+`<NEXT_PUBLIC_APP_URL>/api/oauth/<network>/callback`.
 
 ## Scripts
 

@@ -25,6 +25,19 @@ export interface PostDraftInput {
   status: PostStatus;
 }
 
+export interface ConnectTokens {
+  accessToken: string;
+  refreshToken?: string;
+  expiresIn: number;
+  handle?: string;
+  displayName?: string;
+}
+
+/** An account record with its decrypted tokens attached, for the worker only. */
+export type HydratedAccount = AccountRecord & {
+  tokens?: { accessToken: string; refreshToken?: string };
+};
+
 export interface DataPort {
   mode: "live" | "demo";
 
@@ -38,10 +51,16 @@ export interface DataPort {
 
   accounts: {
     listByUser(userId: string): Promise<AccountRecord[]>;
-    connect(userId: string, network: NetworkId): Promise<AccountRecord>;
+    /** Every account for a user with decrypted tokens, used by the worker. */
+    forPublishing(userId: string): Promise<HydratedAccount[]>;
+    connect(userId: string, network: NetworkId, tokens?: ConnectTokens): Promise<AccountRecord>;
     disconnect(userId: string, accountId: string): Promise<void>;
-    refresh(userId: string, accountId: string): Promise<AccountRecord>;
-    listExpiring(withinHours: number): Promise<AccountRecord[]>;
+    refresh(
+      userId: string,
+      accountId: string,
+      tokens?: { accessToken: string; refreshToken?: string; expiresIn: number },
+    ): Promise<AccountRecord>;
+    listExpiring(withinHours: number): Promise<HydratedAccount[]>;
   };
 
   posts: {

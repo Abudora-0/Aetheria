@@ -66,7 +66,10 @@ export const demoPort: DataPort = {
         .accounts.filter((a) => a.userId === userId)
         .sort((a, b) => a.network.localeCompare(b.network));
     },
-    async connect(userId, network) {
+    async forPublishing(userId) {
+      return demoStore().accounts.filter((a) => a.userId === userId);
+    },
+    async connect(userId, network, tokens) {
       const store = demoStore();
       const existing = store.accounts.find((a) => a.userId === userId && a.network === network);
       if (existing) return existing;
@@ -75,12 +78,14 @@ export const demoPort: DataPort = {
         id: shortId("acc"),
         userId,
         network,
-        handle: "you",
-        displayName: "Your channel",
+        handle: tokens?.handle ?? "you",
+        displayName: tokens?.displayName ?? "Your channel",
         avatarColor: meta.accent,
         followers: 120 + Math.floor(Math.random() * 900),
         connectedAt: new Date().toISOString(),
-        tokenExpiresAt: new Date(Date.now() + 55 * DAY).toISOString(),
+        tokenExpiresAt: new Date(
+          Date.now() + (tokens ? tokens.expiresIn * 1000 : 55 * DAY),
+        ).toISOString(),
         lastRefreshedAt: new Date().toISOString(),
         status: "healthy",
       };
@@ -91,11 +96,13 @@ export const demoPort: DataPort = {
       const store = demoStore();
       store.accounts = store.accounts.filter((a) => !(a.userId === userId && a.id === accountId));
     },
-    async refresh(userId, accountId) {
+    async refresh(userId, accountId, tokens) {
       const store = demoStore();
       const account = store.accounts.find((a) => a.userId === userId && a.id === accountId);
       if (!account) throw new Error("Account not found");
-      account.tokenExpiresAt = new Date(Date.now() + 55 * DAY).toISOString();
+      account.tokenExpiresAt = new Date(
+        Date.now() + (tokens ? tokens.expiresIn * 1000 : 55 * DAY),
+      ).toISOString();
       account.lastRefreshedAt = new Date().toISOString();
       account.status = "healthy";
       return account;

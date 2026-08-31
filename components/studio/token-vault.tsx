@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNowStrict } from "date-fns";
 import { Loader2, Plug, RefreshCw, ShieldCheck, Unplug } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NETWORKS, NETWORK_LIST, type NetworkId } from "@/lib/constants";
 import type { AccountRecord } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,22 @@ const STATUS_TONE = {
   revoked: "var(--danger)",
 } as const;
 
+const OAUTH_ERRORS: Record<string, string> = {
+  channel_limit: "You have reached your plan's channel limit",
+  invalid_oauth_state: "The connection could not be verified, try again",
+  unknown_network: "That network is not supported",
+  access_denied: "You cancelled the connection",
+  oauth_failed: "The network rejected the connection",
+};
+
 export function TokenVault({
   accounts,
   adapters,
+  notice,
 }: {
   accounts: AccountRecord[];
   adapters: { network: NetworkId; name: string; live: boolean }[];
+  notice?: { connected?: string; error?: string; mode?: string };
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -30,24 +40,24 @@ export function TokenVault({
 
   const connectedIds = new Set(accounts.map((a) => a.network));
 
-  async function connect(network: NetworkId) {
-    setBusy(network);
-    try {
-      const res = await fetch("/api/accounts", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ network }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        toast.error(json.error ?? "Could not connect");
-        return;
-      }
-      toast.success(`${NETWORKS[network].name} connected`);
-      router.refresh();
-    } finally {
-      setBusy(null);
+  useEffect(() => {
+    if (!notice?.connected && !notice?.error) return;
+    if (notice.connected) {
+      const name = NETWORKS[notice.connected as NetworkId]?.name ?? notice.connected;
+      toast.success(
+        `${name} connected`,
+        notice.mode === "sandbox" ? "Sandbox channel, no OAuth app configured" : undefined,
+      );
+    } else if (notice.error) {
+      toast.error(OAUTH_ERRORS[notice.error] ?? decodeURIComponent(notice.error));
     }
+    router.replace("/studio/accounts");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notice?.connected, notice?.error]);
+
+  function connect(network: NetworkId) {
+    setBusy(network);
+    window.location.assign(`/api/oauth/${network}/authorize`);
   }
 
   async function act(id: string, method: string, label: string) {

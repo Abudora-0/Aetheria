@@ -75,7 +75,7 @@ async function publishPost(post: PostRecord): Promise<{
   nextAttemptAt: string | null;
 }> {
   const data = await getData();
-  const accounts = await data.accounts.listByUser(post.userId);
+  const accounts = await data.accounts.forPublishing(post.userId);
   const byNetwork = new Map(accounts.map((a) => [a.network, a]));
   const results: PublishResult[] = [];
 
