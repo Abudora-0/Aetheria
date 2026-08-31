@@ -10,6 +10,15 @@
 </p>
 
 <p align="center">
+  <a href="https://aetheriia.vercel.app"><strong>Live demo</strong></a>
+  &nbsp;&middot;&nbsp;
+  <a href="#getting-started">Run locally</a>
+  &nbsp;&middot;&nbsp;
+  <a href="#the-analytics-engine">Analytics engine</a>
+</p>
+
+<p align="center">
+  <a href="https://aetheriia.vercel.app"><img alt="Live on Vercel" src="https://img.shields.io/badge/demo-live-4fd1c5.svg" /></a>
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-8b5cf6.svg" />
   <img alt="Next.js" src="https://img.shields.io/badge/Next.js-16-000000.svg?logo=next.js" />
   <img alt="React" src="https://img.shields.io/badge/React-19-4fd1c5.svg?logo=react" />
