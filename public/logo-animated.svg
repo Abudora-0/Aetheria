@@ -4,36 +4,37 @@
       <stop offset="0%" stop-color="#4FD1C5">
         <animate attributeName="stop-color" values="#4FD1C5;#8B5CF6;#F472B6;#4FD1C5" dur="8s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="55%" stop-color="#8B5CF6">
+      <stop offset="52%" stop-color="#8B5CF6">
         <animate attributeName="stop-color" values="#8B5CF6;#F472B6;#4FD1C5;#8B5CF6" dur="8s" repeatCount="indefinite"/>
       </stop>
       <stop offset="100%" stop-color="#F472B6">
         <animate attributeName="stop-color" values="#F472B6;#4FD1C5;#8B5CF6;#F472B6" dur="8s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
-    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
-      <feGaussianBlur stdDeviation="3.4" result="b"/>
+    <filter id="glow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
 
-  <circle cx="80" cy="80" r="62" fill="none" stroke="url(#aurora)" stroke-opacity="0.18" stroke-width="1"/>
+  <circle cx="80" cy="80" r="12" fill="none" stroke="url(#aurora)" stroke-width="2">
+    <animate attributeName="r" values="12;74" dur="2.8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.45;0" dur="2.8s" repeatCount="indefinite"/>
+  </circle>
 
-  <g fill="none" stroke="url(#aurora)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
-    <path d="M34 122 L80 30 L126 122" stroke-dasharray="240" stroke-dashoffset="240">
-      <animate attributeName="stroke-dashoffset" from="240" to="0" dur="1.9s" begin="0s" fill="freeze"/>
+  <g fill="none" stroke="url(#aurora)" stroke-linecap="round" filter="url(#glow)">
+    <path d="M80 53 A 27 27 0 0 1 80 107" stroke-width="8">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
     </path>
-    <path d="M52 92 L108 92" stroke-dasharray="60" stroke-dashoffset="60">
-      <animate attributeName="stroke-dashoffset" from="60" to="0" dur="0.7s" begin="1.5s" fill="freeze"/>
+    <path d="M80 35 A 45 45 0 0 1 80 125" stroke-width="7">
+      <animate attributeName="opacity" values="0.3;0.62;0.3" dur="3s" begin="0.4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M80 17 A 63 63 0 0 1 80 143" stroke-width="6">
+      <animate attributeName="opacity" values="0.16;0.4;0.16" dur="3s" begin="0.8s" repeatCount="indefinite"/>
     </path>
   </g>
 
-  <g>
-    <animateTransform attributeName="transform" type="rotate" from="0 80 80" to="360 80 80" dur="9s" repeatCount="indefinite"/>
-    <circle cx="80" cy="18" r="4" fill="#F5C451" filter="url(#glow)"/>
-  </g>
-  <g>
-    <animateTransform attributeName="transform" type="rotate" from="360 80 80" to="0 80 80" dur="14s" repeatCount="indefinite"/>
-    <circle cx="142" cy="80" r="2.6" fill="#4FD1C5" filter="url(#glow)"/>
-  </g>
+  <circle cx="80" cy="80" r="8" fill="#F5C451" filter="url(#glow)">
+    <animate attributeName="r" values="8;10;8" dur="3s" repeatCount="indefinite"/>
+  </circle>
 </svg>

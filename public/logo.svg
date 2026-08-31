@@ -2,15 +2,14 @@
   <defs>
     <linearGradient id="aurora" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#4FD1C5"/>
-      <stop offset="55%" stop-color="#8B5CF6"/>
+      <stop offset="52%" stop-color="#8B5CF6"/>
       <stop offset="100%" stop-color="#F472B6"/>
     </linearGradient>
   </defs>
-  <circle cx="80" cy="80" r="62" fill="none" stroke="url(#aurora)" stroke-opacity="0.18" stroke-width="1"/>
-  <g fill="none" stroke="url(#aurora)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M34 122 L80 30 L126 122"/>
-    <path d="M52 92 L108 92"/>
+  <g fill="none" stroke="url(#aurora)" stroke-linecap="round">
+    <path d="M80 53 A 27 27 0 0 1 80 107" stroke-width="8"/>
+    <path d="M80 35 A 45 45 0 0 1 80 125" stroke-width="7" opacity="0.6"/>
+    <path d="M80 17 A 63 63 0 0 1 80 143" stroke-width="6" opacity="0.32"/>
   </g>
-  <circle cx="80" cy="18" r="4" fill="#F5C451"/>
-  <circle cx="142" cy="80" r="2.6" fill="#4FD1C5"/>
+  <circle cx="80" cy="80" r="8" fill="#F5C451"/>
 </svg>
