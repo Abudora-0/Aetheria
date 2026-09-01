@@ -18,6 +18,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/Abudora-0/Aetheria/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Abudora-0/Aetheria/actions/workflows/ci.yml/badge.svg" /></a>
   <a href="https://aetheriia.vercel.app"><img alt="Live on Vercel" src="https://img.shields.io/badge/demo-live-4fd1c5.svg" /></a>
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-8b5cf6.svg" />
   <img alt="Next.js" src="https://img.shields.io/badge/Next.js-16-000000.svg?logo=next.js" />
@@ -187,9 +188,19 @@ When a network's credentials are set, "Connect" on the Token Vault runs the real
 | --- | --- |
 | `npm run dev` | start the dev server |
 | `npm run build` | production build |
+| `npm test` | run the Vitest unit suite |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` | lint the project |
 | `npm run seed` | seed a MongoDB database with demo history |
 | `npm run pipelines:check` | run the aggregation pipelines and print their output |
-| `npm run lint` | lint the project |
+
+## Testing and CI
+
+`npm test` covers the parts most worth locking down: the token crypto, the OAuth
+helpers (PKCE, signed state), the analytics reducers, the composer helpers, the
+in-memory rate limiter, and the publish worker (a due post publishes, a failed one
+backs off, and a job is claimed only once when two ticks race). GitHub Actions runs
+lint, typecheck, tests and a production build on every push and pull request.
 
 ## Roadmap
 

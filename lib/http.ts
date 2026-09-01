@@ -9,6 +9,13 @@ export function fail(message: string, status = 400, extra?: Record<string, unkno
   return NextResponse.json({ ok: false, error: message, ...extra }, { status });
 }
 
+export function tooMany(retryAfterSeconds: number) {
+  return NextResponse.json(
+    { ok: false, error: "Too many requests, slow down" },
+    { status: 429, headers: { "retry-after": String(Math.max(1, retryAfterSeconds)) } },
+  );
+}
+
 export function handleError(err: unknown) {
   if (err instanceof ZodError) {
     return fail("Validation failed", 422, { issues: err.flatten() });

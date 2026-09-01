@@ -1,6 +1,7 @@
 import { requireApiUser } from "@/lib/api-auth";
 import { uploadMedia } from "@/lib/cloudinary";
-import { fail, handleError, ok } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
+import { fail, handleError, ok, tooMany } from "@/lib/http";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -9,7 +10,10 @@ const MAX_BYTES = 12 * 1024 * 1024;
 
 export async function POST(request: Request) {
   try {
-    await requireApiUser();
+    const user = await requireApiUser();
+    const gate = rateLimit(`upload:${user.id}`, 20, 60_000);
+    if (!gate.ok) return tooMany(gate.retryAfterSeconds);
+
     const form = await request.formData();
     const file = form.get("file");
     if (!(file instanceof File)) return fail("No file provided", 422);

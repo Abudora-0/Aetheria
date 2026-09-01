@@ -23,6 +23,7 @@ const OAUTH_ERRORS: Record<string, string> = {
   unknown_network: "That network is not supported",
   access_denied: "You cancelled the connection",
   oauth_failed: "The network rejected the connection",
+  rate_limited: "Too many connection attempts, wait a minute",
 };
 
 export function TokenVault({

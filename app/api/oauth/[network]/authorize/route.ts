@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getData } from "@/lib/data";
 import { integrations, env } from "@/lib/env";
 import { NETWORKS, PLANS, type NetworkId } from "@/lib/constants";
+import { rateLimit } from "@/lib/rate-limit";
 import {
   buildAuthorizeUrl,
   createPkcePair,
@@ -31,6 +32,10 @@ export async function GET(request: Request, ctx: { params: Promise<{ network: st
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.redirect(new URL("/sign-in?next=/studio/accounts", origin));
+  }
+
+  if (!rateLimit(`oauth:${user.id}`, 12, 60_000).ok) {
+    return accountsUrl("error=rate_limited");
   }
 
   const data = await getData();
