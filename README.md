@@ -43,6 +43,18 @@
 
 ---
 
+## Screens
+
+The [live demo](https://aetheriia.vercel.app) is the fastest tour. Sign in with
+`demo@aetheria.app` / `aurora` for a seeded workspace.
+
+| | |
+| --- | --- |
+| [Landing](https://aetheriia.vercel.app) | Animated Pulse mark, aether particle field, scroll storytelling |
+| [Composer](https://aetheriia.vercel.app/studio/compose) | One editor, live per network preview cards, character rings, Optimal Time Halo |
+| [The Dial](https://aetheriia.vercel.app/studio/calendar) | Radial 24 hour clock and a week grid you can drag signals across |
+| [Aurora Analytics](https://aetheriia.vercel.app/studio/analytics) | Growth curves, engagement by network, the 7 x 24 timing heatmap, CSV export |
+
 ## What it is
 
 Aetheria is a full stack SaaS built around one loop: **draft, schedule, auto publish, learn.**
@@ -59,7 +71,7 @@ apps and each subsystem switches to live, one at a time.
 | Area | What is inside |
 | --- | --- |
 | **Aether Composer** | One editor, live per network previews, animated character count rings, hashtag and mention highlighting, media drop zone |
-| **The Dial** | A radial 24 hour clock for today and a constellation week grid, tap any signal to reschedule |
+| **The Dial** | A radial 24 hour clock for today and a constellation week grid, drag a signal to another day or tap it for an exact time |
 | **Optimal Time Halo** | Golden posting windows computed from your own engagement history, overlaid on the composer |
 | **Signal Queue** | Every upcoming auto publish with a live countdown, status pulse, retry and cancel |
 | **Aurora Analytics** | Impression growth with a 7 day moving average, engagement rate per network, a 7 x 24 timing heatmap and a cadence score |
@@ -174,6 +186,7 @@ other keys from `.env.example` to enable Stripe, Cloudinary and each social netw
 | `JWT_SECRET` | signs the session cookie | a development default |
 | `TOKEN_ENC_KEY` | encrypts stored OAuth tokens | tokens stored reversibly, dev only |
 | `CRON_SECRET` | authorizes Vercel Cron calls | cron open in dev, blocked in prod |
+| `RESEND_API_KEY` / `EMAIL_FROM` | transactional email (welcome, password reset, publish failures) | emails logged to the server console |
 | `CLOUDINARY_*` | media uploads | deterministic placeholder images |
 | `STRIPE_*` | billing | the simulate billing path |
 | `<NETWORK>_CLIENT_ID` / `_SECRET` | live OAuth and publishing | a sandbox channel per network |
@@ -204,7 +217,6 @@ lint, typecheck, tests and a production build on every push and pull request.
 
 ## Roadmap
 
-- Drag to reschedule on The Dial
 - Thread and carousel composition
 - Team workspaces and roles
 - Webhook out for publish events
