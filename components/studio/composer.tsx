@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Compass, ImagePlus, Loader2, Send, X } from "lucide-react";
+import { Check, Compass, ImagePlus, Loader2, Send, X } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { NETWORKS, NETWORK_LIST, type NetworkId } from "@/lib/constants";
 import type { AccountRecord, GoldenWindow, MediaAsset, PostRecord } from "@/lib/types";
@@ -171,22 +171,26 @@ export function Composer({
               const isConnected = connected.includes(n.id);
               const isOn = selected.includes(n.id);
               return (
-                <button
+                <motion.button
                   key={n.id}
+                  type="button"
                   disabled={!isConnected}
                   onClick={() => toggleNetwork(n.id)}
                   title={isConnected ? n.name : `Connect ${n.name} first`}
+                  whileTap={{ scale: 0.94 }}
+                  animate={{ scale: isOn ? 1.03 : 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 22 }}
                   className={cn(
-                    "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-all disabled:opacity-35",
+                    "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors disabled:opacity-35",
                     isOn
                       ? "border-transparent text-[#07080d]"
                       : "border-[var(--border-strong)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
                   )}
                   style={isOn ? { background: n.accent } : undefined}
                 >
-                  <n.icon size={13} />
+                  {isOn ? <Check size={13} strokeWidth={3} /> : <n.icon size={13} />}
                   {n.name}
-                </button>
+                </motion.button>
               );
             })}
           </div>
