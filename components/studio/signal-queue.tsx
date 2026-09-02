@@ -81,7 +81,7 @@ export function SignalQueue({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -12 }}
-              className="panel flex flex-col gap-3 p-4 sm:flex-row sm:items-center"
+              className="panel card-interactive flex flex-col gap-3 p-4 sm:flex-row sm:items-center"
             >
               <div className="flex -space-x-1.5">
                 {p.networks.map((n) => {

@@ -13,9 +13,16 @@ export function CtaBand() {
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="panel relative overflow-hidden px-8 py-16 text-center"
+        className="group panel relative overflow-hidden px-6 py-14 text-center sm:px-8 sm:py-16"
       >
         <AuroraBackdrop />
+        <div
+          className="pointer-events-none absolute inset-0 -translate-x-full opacity-0 transition-all duration-700 group-hover:translate-x-full group-hover:opacity-100"
+          style={{
+            background:
+              "linear-gradient(105deg, transparent 40%, color-mix(in oklab, var(--aurora-violet) 22%, transparent) 50%, transparent 60%)",
+          }}
+        />
         <div className="relative z-10 flex flex-col items-center">
           <AetheriaMark size={56} />
           <h2 className="mt-6 max-w-xl text-balance text-4xl md:text-5xl">

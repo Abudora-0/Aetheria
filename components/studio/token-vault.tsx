@@ -58,6 +58,9 @@ export function TokenVault({
 
   function connect(network: NetworkId) {
     setBusy(network);
+    // A full navigation is required: this hits an API route that server-redirects
+    // to the provider's OAuth screen, not a client-navigable page.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign(`/api/oauth/${network}/authorize`);
   }
 
@@ -90,7 +93,7 @@ export function TokenVault({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96 }}
-                className="panel p-4"
+                className="panel card-interactive p-4"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2.5">

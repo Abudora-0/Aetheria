@@ -73,13 +73,17 @@ export function FeatureGrid() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.5, delay: (i % 3) * 0.06 }}
-            className={`panel group relative overflow-hidden p-6 ${f.span}`}
+            className={`panel hover-lift group relative overflow-hidden p-6 ${f.span}`}
           >
             <div
-              className="absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-40"
+              className="absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-50"
               style={{ background: f.accent }}
             />
-            <f.icon size={22} style={{ color: f.accent }} />
+            <f.icon
+              size={22}
+              style={{ color: f.accent }}
+              className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-110"
+            />
             <h3 className="mt-4 text-xl">{f.title}</h3>
             <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">{f.body}</p>
           </motion.article>

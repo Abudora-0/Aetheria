@@ -21,8 +21,8 @@ export function TimingHeatmap({ cells }: { cells: TimingCell[] }) {
   }, [cells]);
 
   return (
-    <div>
-      <div className="grid grid-cols-[auto_1fr] gap-x-2">
+    <div className="-mx-1 overflow-x-auto px-1 pb-1">
+      <div className="grid min-w-[420px] grid-cols-[auto_1fr] gap-x-2">
         <div />
         <div className="mb-1 flex justify-between px-0.5 text-[0.55rem] text-[var(--faint-foreground)]">
           {[0, 6, 12, 18, 23].map((h) => (

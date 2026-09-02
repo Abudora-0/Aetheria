@@ -47,7 +47,7 @@ export function StatTile({
   delta?: number;
 }) {
   return (
-    <div className="panel p-4">
+    <div className="panel hover-lift p-4">
       <p className="text-xs text-[var(--faint-foreground)]">{label}</p>
       <div className="mt-1 flex items-end justify-between">
         <span className="font-display text-2xl font-semibold text-[var(--foreground)]">

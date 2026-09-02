@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { AetheriaMark } from "@/components/brand/aetheria-mark";
 import { ThemeToggle } from "@/components/system/theme-toggle";
 import { CommandPalette } from "@/components/studio/command-palette";
+import { RouteTransition } from "@/components/studio/route-transition";
 import { Badge } from "@/components/ui/badge";
 import { PLANS, type PlanId } from "@/lib/constants";
 import type { SessionUser } from "@/lib/types";
@@ -77,9 +78,12 @@ export function StudioShell({
 
   const sidebar = (
     <div className="flex h-full flex-col gap-1 p-3">
-      <Link href="/studio" className="mb-4 flex items-center gap-2.5 px-2 py-1">
-        <AetheriaMark size={30} />
-        <span className="font-display text-lg font-semibold">Aetheria</span>
+      <Link
+        href="/studio"
+        className="mb-4 flex items-center gap-2.5 px-2 py-1 transition-transform hover:scale-[1.02]"
+      >
+        <AetheriaMark size={36} />
+        <span className="font-display text-xl font-semibold">Aetheria</span>
       </Link>
 
       <button
@@ -101,7 +105,7 @@ export function StudioShell({
               key={item.href}
               href={item.href}
               className={cn(
-                "relative flex items-center gap-2.5 rounded-[var(--radius-md)] px-3 py-2 text-sm transition-colors",
+                "group relative flex items-center gap-2.5 rounded-[var(--radius-md)] px-3 py-2 text-sm transition-colors",
                 active
                   ? "text-[var(--foreground)]"
                   : "text-[var(--muted-foreground)] hover:bg-[var(--bg-raise)] hover:text-[var(--foreground)]",
@@ -114,8 +118,13 @@ export function StudioShell({
                   transition={{ type: "spring", stiffness: 400, damping: 32 }}
                 />
               ) : null}
-              <item.icon size={16} className="relative" />
-              <span className="relative">{item.label}</span>
+              <item.icon
+                size={16}
+                className="relative transition-transform duration-200 group-hover:translate-x-0.5"
+              />
+              <span className="relative transition-transform duration-200 group-hover:translate-x-0.5">
+                {item.label}
+              </span>
             </Link>
           );
         })}
@@ -175,11 +184,11 @@ export function StudioShell({
               className="fixed inset-0 z-40 bg-black/60 lg:hidden"
             />
             <motion.aside
-              initial={{ x: -280 }}
+              initial={{ x: "-100%" }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
+              exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 32 }}
-              className="fixed inset-y-0 left-0 z-50 w-[264px] border-r border-[var(--border)] bg-[var(--bg-sink)] lg:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-[min(88vw,300px)] overflow-y-auto border-r border-[var(--border)] bg-[var(--bg-sink)] lg:hidden"
             >
               {sidebar}
             </motion.aside>
@@ -208,7 +217,9 @@ export function StudioShell({
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-9">{children}</main>
+        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-9">
+          <RouteTransition>{children}</RouteTransition>
+        </main>
       </div>
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />

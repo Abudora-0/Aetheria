@@ -1,17 +1,16 @@
-import Link from "next/link";
-import { AetheriaWordmark } from "@/components/brand/aetheria-mark";
-import { AuroraBackdrop } from "@/components/visual/aurora-backdrop";
-import { AetherField } from "@/components/visual/aether-field";
+import { AuthAside } from "@/components/auth/auth-aside";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative grid min-h-full place-items-center overflow-hidden px-4 py-16">
-      <AuroraBackdrop subtle />
-      <AetherField className="pointer-events-none absolute inset-0 h-full w-full opacity-40" />
-      <Link href="/" className="absolute left-6 top-6 z-10">
-        <AetheriaWordmark size={30} mode="static" />
-      </Link>
-      <div className="relative z-10 w-full max-w-sm">{children}</div>
+    <div className="grid min-h-svh lg:grid-cols-[1.05fr_1fr]">
+      <AuthAside />
+      <div className="relative flex items-center justify-center overflow-hidden px-5 py-12 sm:px-8">
+        <div
+          className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full opacity-20 blur-[110px] lg:hidden"
+          style={{ background: "var(--aurora-magenta)" }}
+        />
+        <div className="relative z-10 w-full max-w-[26rem]">{children}</div>
+      </div>
     </div>
   );
 }

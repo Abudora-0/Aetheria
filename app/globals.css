@@ -251,13 +251,80 @@ input[type="range"] {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes aether-drop {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes aether-shimmer {
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }
 }
 
+@keyframes aether-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes aether-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
 .animate-rise {
   animation: aether-rise 0.7s var(--ease-aether) both;
+}
+
+.animate-drop {
+  animation: aether-drop 0.6s var(--ease-aether) both;
+}
+
+/* =========================================================================
+   Interaction utilities
+   ========================================================================= */
+
+.hover-lift {
+  transition: transform 0.25s var(--ease-aether), border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+}
+
+.card-interactive {
+  transition: transform 0.2s var(--ease-aether), border-color 0.2s ease, background-color 0.2s ease;
+}
+.card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+}
+
+/* Animated underline that sweeps in from the left on hover */
+.link-sweep {
+  position: relative;
+}
+.link-sweep::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 1.5px;
+  width: 100%;
+  background: var(--aurora-gradient);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease-aether);
+}
+.link-sweep:hover::after {
+  transform: scaleX(1);
+}
+
+.marquee-track {
+  animation: aether-marquee 26s linear infinite;
+}
+.marquee-mask {
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
 }
 
 .shimmer {
@@ -276,6 +343,7 @@ input[type="range"] {
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
@@ -286,6 +354,7 @@ input[type="range"] {
 :root[data-reduce-motion="true"] *::before,
 :root[data-reduce-motion="true"] *::after {
   animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.001ms !important;
 }

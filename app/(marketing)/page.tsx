@@ -1,4 +1,5 @@
 import { Hero } from "@/components/marketing/hero";
+import { MarqueeStrip } from "@/components/marketing/marquee-strip";
 import { FeatureGrid } from "@/components/marketing/feature-grid";
 import { Workflow } from "@/components/marketing/workflow";
 import { AnalyticsPreview } from "@/components/marketing/analytics-preview";
@@ -15,6 +16,7 @@ export default function LandingPage() {
   return (
     <>
       <Hero />
+      <MarqueeStrip />
       <FeatureGrid />
       <AnalyticsPreview bundle={bundle} />
       <Workflow />

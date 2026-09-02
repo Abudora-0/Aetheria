@@ -55,12 +55,11 @@ export const metadata: Metadata = {
     description: APP_TAGLINE,
     type: "website",
   },
-  icons: {
-    icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
-  },
 };
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
   themeColor: "#07080d",
   colorScheme: "dark light",
 };

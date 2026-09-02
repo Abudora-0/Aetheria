@@ -110,7 +110,10 @@ export function AetheriaWordmark({
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
       <AetheriaMark size={size} mode={mode} />
-      <span className="font-display text-[1.35rem] font-semibold tracking-tight text-[var(--foreground)]">
+      <span
+        className="font-display font-semibold tracking-tight text-[var(--foreground)]"
+        style={{ fontSize: `${Math.round(size * 0.62)}px` }}
+      >
         Aetheria
       </span>
     </span>
