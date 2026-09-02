@@ -26,6 +26,11 @@ export function AetheriaMark({ size = 40, className, mode = "idle" }: AetheriaMa
   const gid = useId().replace(/[:]/g, "");
   const reduce = useReducedMotion();
   const animate = mode !== "static" && !reduce;
+  const idleLoop = mode === "idle" && animate;
+  // The blur filter is cheap to paint once but expensive to re-evaluate every
+  // frame, so the looping idle mark skips it and only the still/trace mark wears
+  // the glow.
+  const glow = idleLoop ? undefined : `url(#glow-${gid})`;
 
   return (
     <svg
@@ -71,7 +76,7 @@ export function AetheriaMark({ size = 40, className, mode = "idle" }: AetheriaMa
           stroke={`url(#aurora-${gid})`}
           strokeWidth={ring.width}
           strokeLinecap="round"
-          filter={`url(#glow-${gid})`}
+          filter={glow}
           style={{ transformOrigin: "80px 80px" }}
           initial={
             mode === "trace" ? { scale: 0, opacity: 0 } : { scale: 1, opacity: ring.base }
@@ -79,14 +84,12 @@ export function AetheriaMark({ size = 40, className, mode = "idle" }: AetheriaMa
           animate={
             mode === "trace"
               ? { scale: 1, opacity: ring.base }
-              : animate
-                ? { scale: 1, opacity: [ring.base * 0.55, ring.base, ring.base * 0.55] }
-                : { scale: 1, opacity: ring.base }
+              : { scale: 1, opacity: ring.base }
           }
           transition={
             mode === "trace"
               ? { duration: 0.7, delay: i * 0.16, ease: [0.16, 1, 0.3, 1] }
-              : { duration: 3.2, repeat: Infinity, delay: i * 0.35, ease: "easeInOut" }
+              : { duration: 0.4 }
           }
         />
       ))}
@@ -96,7 +99,7 @@ export function AetheriaMark({ size = 40, className, mode = "idle" }: AetheriaMa
         animate={animate ? { scale: [1, 1.16, 1] } : undefined}
         transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
       >
-        <circle cx="80" cy="80" r="7.5" fill="var(--aurora-gold)" filter={`url(#glow-${gid})`} />
+        <circle cx="80" cy="80" r="7.5" fill="var(--aurora-gold)" filter={glow} />
       </motion.g>
     </svg>
   );

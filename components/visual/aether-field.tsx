@@ -19,13 +19,17 @@ interface Particle {
 }
 
 const HUES = [172, 258, 322, 45];
+const LINK_DIST = 116;
+const FRAME_MS = 1000 / 30; // cap at ~30fps, plenty for an ambient field
 
 /**
  * Lightweight 2D particle field. Points drift on a slow current and lean
  * toward the pointer to give the "aether" a sense of depth. Pauses entirely
- * when reduced motion is requested or the tab is hidden.
+ * when reduced motion is requested, the tab is hidden, or the canvas is
+ * scrolled out of view. Neighbour links use a spatial hash so the cost stays
+ * linear in the particle count.
  */
-export function AetherField({ density = 0.00012, className, interactive = true }: AetherFieldProps) {
+export function AetherField({ density = 0.00009, className, interactive = true }: AetherFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { reduced } = useMotionPrefs();
 
@@ -40,12 +44,22 @@ export function AetherField({ density = 0.00012, className, interactive = true }
     let particles: Particle[] = [];
     let raf = 0;
     let running = true;
+    let onScreen = true;
+    let last = 0;
+    let rect = canvas.getBoundingClientRect();
     const pointer = { x: -9999, y: -9999 };
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    const isCoarse =
+      typeof window !== "undefined" && window.matchMedia?.("(pointer: coarse)").matches;
+
+    function particleCount() {
+      if (reduced) return 0;
+      const cap = width < 640 ? 46 : 104;
+      return Math.min(cap, Math.floor(width * height * density));
+    }
 
     function seed() {
-      const count = reduced ? 0 : Math.min(160, Math.floor(width * height * density));
-      particles = Array.from({ length: count }, () => ({
+      particles = Array.from({ length: particleCount() }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
         z: 0.2 + Math.random() * 0.8,
@@ -64,17 +78,57 @@ export function AetherField({ density = 0.00012, className, interactive = true }
       canvas!.style.width = `${width}px`;
       canvas!.style.height = `${height}px`;
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      rect = canvas!.getBoundingClientRect();
       seed();
     }
 
-    function tick() {
-      if (!running) return;
+    function drawLinks() {
+      // Spatial hash: bucket particles into LINK_DIST cells, only compare a
+      // particle against its own cell and the cell to the right / below.
+      const cols = Math.max(1, Math.ceil(width / LINK_DIST));
+      const grid = new Map<number, Particle[]>();
+      for (const p of particles) {
+        const key = Math.floor(p.x / LINK_DIST) + Math.floor(p.y / LINK_DIST) * cols;
+        const bucket = grid.get(key);
+        if (bucket) bucket.push(p);
+        else grid.set(key, [p]);
+      }
+      const neighbours = [0, 1, cols - 1, cols, cols + 1];
+      ctx!.lineWidth = 0.6;
+      for (const [key, bucket] of grid) {
+        for (const offset of neighbours) {
+          const other = offset === 0 ? bucket : grid.get(key + offset);
+          if (!other) continue;
+          for (let i = 0; i < bucket.length; i++) {
+            const a = bucket[i];
+            for (let j = offset === 0 ? i + 1 : 0; j < other.length; j++) {
+              const b = other[j];
+              const d = Math.hypot(a.x - b.x, a.y - b.y);
+              if (d < LINK_DIST) {
+                ctx!.beginPath();
+                ctx!.moveTo(a.x, a.y);
+                ctx!.lineTo(b.x, b.y);
+                ctx!.strokeStyle = `hsla(258, 70%, 70%, ${(1 - d / LINK_DIST) * 0.08})`;
+                ctx!.stroke();
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function tick(now: number) {
+      raf = requestAnimationFrame(tick);
+      if (!running || !onScreen) return;
+      if (now - last < FRAME_MS) return;
+      last = now;
+
       ctx!.clearRect(0, 0, width, height);
       for (const p of particles) {
         p.x += p.vx * p.z;
         p.y += p.vy * p.z;
 
-        if (interactive) {
+        if (interactive && !isCoarse) {
           const dx = p.x - pointer.x;
           const dy = p.y - pointer.y;
           const dist = Math.hypot(dx, dy);
@@ -97,30 +151,17 @@ export function AetherField({ density = 0.00012, className, interactive = true }
         ctx!.fill();
       }
 
-      // Constellation links
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const a = particles[i];
-          const b = particles[j];
-          const d = Math.hypot(a.x - b.x, a.y - b.y);
-          if (d < 120) {
-            ctx!.beginPath();
-            ctx!.moveTo(a.x, a.y);
-            ctx!.lineTo(b.x, b.y);
-            ctx!.strokeStyle = `hsla(258, 70%, 70%, ${(1 - d / 120) * 0.08})`;
-            ctx!.lineWidth = 0.6;
-            ctx!.stroke();
-          }
-        }
-      }
-
-      raf = requestAnimationFrame(tick);
+      drawLinks();
     }
 
+    let pointerRaf = 0;
     function onPointerMove(e: PointerEvent) {
-      const rect = canvas!.getBoundingClientRect();
-      pointer.x = e.clientX - rect.left;
-      pointer.y = e.clientY - rect.top;
+      if (pointerRaf) return;
+      pointerRaf = requestAnimationFrame(() => {
+        pointerRaf = 0;
+        pointer.x = e.clientX - rect.left;
+        pointer.y = e.clientY - rect.top;
+      });
     }
     function onPointerLeave() {
       pointer.x = -9999;
@@ -128,23 +169,36 @@ export function AetherField({ density = 0.00012, className, interactive = true }
     }
     function onVisibility() {
       running = !document.hidden && !reduced;
-      if (running) tick();
-      else cancelAnimationFrame(raf);
     }
+    function onScroll() {
+      rect = canvas!.getBoundingClientRect();
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+      },
+      { rootMargin: "120px" },
+    );
+    io.observe(canvas);
 
     resize();
     window.addEventListener("resize", resize);
-    if (interactive) {
+    window.addEventListener("scroll", onScroll, { passive: true });
+    if (interactive && !isCoarse) {
       window.addEventListener("pointermove", onPointerMove);
       window.addEventListener("pointerleave", onPointerLeave);
     }
     document.addEventListener("visibilitychange", onVisibility);
 
-    if (!reduced) tick();
+    if (!reduced) raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
+      if (pointerRaf) cancelAnimationFrame(pointerRaf);
+      io.disconnect();
       window.removeEventListener("resize", resize);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerleave", onPointerLeave);
       document.removeEventListener("visibilitychange", onVisibility);

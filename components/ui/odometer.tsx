@@ -49,7 +49,12 @@ export function Odometer({
     const controls = animate(mv, value, {
       duration,
       ease: [0.16, 1, 0.3, 1],
-      onUpdate: (v) => setDisplay(render(v, format)),
+      onUpdate: (v) => {
+        const next = render(v, format);
+        // The rendered string only changes a handful of times over the count
+        // (compact / rounded formats), so skip the re-render when it is stable.
+        setDisplay((prev) => (prev === next ? prev : next));
+      },
     });
     return () => controls.stop();
   }, [inView, value, format, duration, mv, reduced]);

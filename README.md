@@ -129,7 +129,7 @@ Agenda.js could drop in behind the same interface.
 - **Next.js 16**, React 19, TypeScript, Turbopack
 - **Tailwind CSS v4** with a custom token system
 - **MongoDB** with Mongoose, aggregation pipelines for analytics
-- **Framer Motion** and **Lenis** for motion, hand built **d3-scale / d3-shape** charts
+- **Framer Motion** for motion, hand built **d3-scale / d3-shape** charts
 - **jose** and **bcryptjs** for auth, **Stripe** and **Cloudinary** SDKs
 - Deploys to **Vercel** with native Cron Jobs
 

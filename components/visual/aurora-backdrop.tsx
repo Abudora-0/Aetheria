@@ -4,13 +4,17 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useMotionPrefs } from "@/components/system/motion-prefs";
 
-/** Ambient aurora blobs that drift behind content. */
+/**
+ * Ambient aurora glow behind content. The soft edge comes from a radial
+ * gradient that fades to transparent, not a `blur()` filter, so moving the
+ * blobs is a pure compositor transform with no per-frame re-rasterization.
+ */
 export function AuroraBackdrop({ className, subtle = false }: { className?: string; subtle?: boolean }) {
   const { reduced } = useMotionPrefs();
   const blobs = [
-    { color: "var(--aurora-teal)", x: "8%", y: "12%", size: 480, dur: 26 },
-    { color: "var(--aurora-violet)", x: "62%", y: "4%", size: 560, dur: 32 },
-    { color: "var(--aurora-magenta)", x: "38%", y: "58%", size: 420, dur: 29 },
+    { color: "var(--aurora-teal)", x: "8%", y: "12%", size: 540, dur: 30 },
+    { color: "var(--aurora-violet)", x: "60%", y: "2%", size: 620, dur: 36 },
+    { color: "var(--aurora-magenta)", x: "38%", y: "58%", size: 480, dur: 33 },
   ];
   return (
     <div className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)} aria-hidden>
@@ -23,9 +27,9 @@ export function AuroraBackdrop({ className, subtle = false }: { className?: stri
             top: b.y,
             width: b.size,
             height: b.size,
-            background: b.color,
-            filter: "blur(120px)",
-            opacity: subtle ? 0.1 : 0.18,
+            background: `radial-gradient(circle at center, ${b.color}, transparent 66%)`,
+            opacity: subtle ? 0.16 : 0.26,
+            willChange: reduced ? undefined : "transform",
           }}
           animate={
             reduced

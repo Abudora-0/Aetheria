@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 import { ArrowRight, ChevronDown, Sparkles } from "lucide-react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { AetheriaMark } from "@/components/brand/aetheria-mark";
 import { AetherField } from "@/components/visual/aether-field";
 import { AuroraBackdrop } from "@/components/visual/aurora-backdrop";
@@ -29,12 +29,37 @@ export function Hero() {
   const sx = useSpring(px, { stiffness: 120, damping: 20 });
   const sy = useSpring(py, { stiffness: 120, damping: 20 });
 
-  function onPointerMove(e: React.PointerEvent) {
+  // Cache the section rect so pointer moves never read layout, and coalesce
+  // updates to one per frame. Skipped entirely on touch / reduced motion.
+  const rectRef = useRef<DOMRect | null>(null);
+  const frameRef = useRef(0);
+  useEffect(() => {
     if (reduced) return;
-    const r = ref.current?.getBoundingClientRect();
-    if (!r) return;
-    px.set(((e.clientX - r.left) / r.width - 0.5) * 26);
-    py.set(((e.clientY - r.top) / r.height - 0.5) * 26);
+    if (window.matchMedia?.("(pointer: coarse)").matches) return;
+    const sync = () => {
+      rectRef.current = ref.current?.getBoundingClientRect() ?? null;
+    };
+    sync();
+    window.addEventListener("resize", sync);
+    window.addEventListener("scroll", sync, { passive: true });
+    return () => {
+      window.removeEventListener("resize", sync);
+      window.removeEventListener("scroll", sync);
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    };
+  }, [reduced]);
+
+  function onPointerMove(e: React.PointerEvent) {
+    if (reduced || frameRef.current) return;
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = 0;
+      const r = rectRef.current;
+      if (!r) return;
+      px.set(((clientX - r.left) / r.width - 0.5) * 26);
+      py.set(((clientY - r.top) / r.height - 0.5) * 26);
+    });
   }
 
   return (
