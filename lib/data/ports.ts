@@ -47,6 +47,11 @@ export interface DataPort {
     create(input: CreateUserInput & { passwordHash: string }): Promise<SessionUser>;
     setPlan(userId: string, plan: PlanId): Promise<void>;
     updateProfile(userId: string, patch: { name?: string; timezone?: string }): Promise<SessionUser>;
+    updatePassword(userId: string, passwordHash: string): Promise<void>;
+    /** Issues a single-use reset token, or null when the email is unknown. */
+    createResetToken(email: string): Promise<{ token: string; user: SessionUser } | null>;
+    /** Validates and consumes a reset token, returning the user id. */
+    consumeResetToken(token: string): Promise<string | null>;
   };
 
   accounts: {

@@ -136,6 +136,20 @@ const subscriptionSchema = new Schema(
 );
 
 /* -------------------------------------------------------------------------- */
+/*  Password reset token                                                       */
+/* -------------------------------------------------------------------------- */
+
+const passwordResetSchema = new Schema(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    tokenHash: { type: String, required: true, unique: true },
+    expiresAt: { type: Date, required: true },
+    usedAt: { type: Date, default: null },
+  },
+  { timestamps: true },
+);
+
+/* -------------------------------------------------------------------------- */
 
 export type UserDoc = InferSchemaType<typeof userSchema>;
 export type AccountDoc = InferSchemaType<typeof accountSchema>;
@@ -148,5 +162,6 @@ export const Account = models.Account ?? model("Account", accountSchema);
 export const Post = models.Post ?? model("Post", postSchema);
 export const Metric = models.Metric ?? model("Metric", metricSchema);
 export const Subscription = models.Subscription ?? model("Subscription", subscriptionSchema);
+export const PasswordReset = models.PasswordReset ?? model("PasswordReset", passwordResetSchema);
 
 export { mongoose };

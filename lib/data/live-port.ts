@@ -1,6 +1,7 @@
 import { NETWORKS, type NetworkId } from "@/lib/constants";
 import { connectToDatabase } from "@/lib/db";
-import { Account, Metric, Post, Subscription, User } from "@/models";
+import { Account, Metric, PasswordReset, Post, Subscription, User } from "@/models";
+import { generateResetToken, hashResetToken, RESET_TOKEN_TTL_MS } from "@/lib/auth/reset-token";
 import type {
   AccountRecord,
   MetricPoint,
@@ -164,6 +165,31 @@ export const livePort: DataPort = {
       const doc = await User.findByIdAndUpdate(userId, { $set: set }, { new: true }).lean();
       if (!doc) throw new Error("User not found");
       return toUser(doc);
+    },
+    async updatePassword(userId, passwordHash) {
+      await connectToDatabase();
+      await User.findByIdAndUpdate(userId, { $set: { passwordHash } });
+    },
+    async createResetToken(email) {
+      await connectToDatabase();
+      const doc = (await User.findOne({ email: email.toLowerCase() }).lean()) as any;
+      if (!doc) return null;
+      const { token, hash } = generateResetToken();
+      await PasswordReset.create({
+        userId: doc._id,
+        tokenHash: hash,
+        expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+      });
+      return { token, user: toUser(doc) };
+    },
+    async consumeResetToken(token) {
+      await connectToDatabase();
+      const entry = (await PasswordReset.findOneAndUpdate(
+        { tokenHash: hashResetToken(token), usedAt: null, expiresAt: { $gt: new Date() } },
+        { $set: { usedAt: new Date() } },
+        { new: true },
+      ).lean()) as any;
+      return entry ? String(entry.userId) : null;
     },
   },
 

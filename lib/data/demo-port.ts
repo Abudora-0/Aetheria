@@ -1,5 +1,6 @@
 import { NETWORKS } from "@/lib/constants";
 import { shortId } from "@/lib/utils";
+import { generateResetToken, hashResetToken, RESET_TOKEN_TTL_MS } from "@/lib/auth/reset-token";
 import type { AccountRecord, PostRecord } from "@/lib/types";
 import type { DataPort, PostDraftInput } from "@/lib/data/ports";
 import { demoStore } from "@/lib/data/demo-store";
@@ -57,6 +58,35 @@ export const demoPort: DataPort = {
       const { passwordHash: _ph, ...rest } = u;
       void _ph;
       return rest;
+    },
+    async updatePassword(userId, passwordHash) {
+      const u = demoStore().users.find((x) => x.id === userId);
+      if (u) u.passwordHash = passwordHash;
+    },
+    async createResetToken(email) {
+      const store = demoStore();
+      const u = store.users.find((x) => x.email === email.toLowerCase());
+      if (!u) return null;
+      const { token, hash } = generateResetToken();
+      store.resets.push({
+        userId: u.id,
+        tokenHash: hash,
+        expiresAt: Date.now() + RESET_TOKEN_TTL_MS,
+        usedAt: null,
+      });
+      const { passwordHash: _ph, ...rest } = u;
+      void _ph;
+      return { token, user: rest };
+    },
+    async consumeResetToken(token) {
+      const store = demoStore();
+      const hash = hashResetToken(token);
+      const entry = store.resets.find(
+        (r) => r.tokenHash === hash && !r.usedAt && r.expiresAt > Date.now(),
+      );
+      if (!entry) return null;
+      entry.usedAt = Date.now();
+      return entry.userId;
     },
   },
 

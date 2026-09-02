@@ -27,6 +27,12 @@ export const env = {
   // Scheduling worker
   cronSecret: read("CRON_SECRET"),
 
+  // Transactional email
+  email: {
+    apiKey: read("RESEND_API_KEY"),
+    from: read("EMAIL_FROM"),
+  },
+
   // Media
   cloudinary: {
     cloudName: read("CLOUDINARY_CLOUD_NAME"),
@@ -67,6 +73,9 @@ export const integrations = {
   },
   get cloudinary() {
     return Boolean(env.cloudinary.cloudName && env.cloudinary.apiKey && env.cloudinary.apiSecret);
+  },
+  get email() {
+    return Boolean(env.email.apiKey && env.email.from);
   },
   social(network: keyof typeof env.social) {
     const app = env.social[network];

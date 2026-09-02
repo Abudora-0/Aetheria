@@ -3,6 +3,8 @@ import { getData } from "@/lib/data";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { sendEmail } from "@/lib/email";
+import { welcomeEmail } from "@/lib/email/templates";
 import { fail, handleError, ok, tooMany } from "@/lib/http";
 
 export const runtime = "nodejs";
@@ -34,6 +36,7 @@ export async function POST(request: Request) {
     });
 
     await createSession(user.id);
+    await sendEmail(welcomeEmail(user.email, user.name)).catch(() => {});
     return ok({ user });
   } catch (err) {
     return handleError(err);

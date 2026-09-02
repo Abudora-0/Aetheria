@@ -14,6 +14,7 @@ export interface DemoStore {
   posts: PostRecord[];
   metrics: MetricPoint[];
   subscriptions: SubscriptionRecord[];
+  resets: { userId: string; tokenHash: string; expiresAt: number; usedAt: number | null }[];
 }
 
 const globalForStore = globalThis as unknown as { _aetheriaDemoStore?: DemoStore };
@@ -42,6 +43,7 @@ export function demoStore(): DemoStore {
     posts: data.posts,
     metrics: data.metrics,
     subscriptions: [data.subscription],
+    resets: [],
   };
 
   globalForStore._aetheriaDemoStore = store;

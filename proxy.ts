@@ -7,7 +7,7 @@ const secret = new TextEncoder().encode(
 );
 
 const PROTECTED = ["/studio"];
-const AUTH_ROUTES = ["/sign-in", "/sign-up"];
+const AUTH_ROUTES = ["/sign-in", "/sign-up", "/forgot"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -41,5 +41,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/studio/:path*", "/sign-in", "/sign-up"],
+  matcher: ["/studio/:path*", "/sign-in", "/sign-up", "/forgot"],
 };

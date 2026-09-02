@@ -1,6 +1,8 @@
 import { nanoid } from "nanoid";
 import { getData } from "@/lib/data";
 import { getAdapter } from "@/lib/social";
+import { sendEmail } from "@/lib/email";
+import { publishFailedEmail } from "@/lib/email/templates";
 import type { NetworkId } from "@/lib/constants";
 import type { PostRecord, PublishResult } from "@/lib/types";
 
@@ -57,11 +59,19 @@ export async function runPublishTick(now = new Date()): Promise<RunReport> {
       );
     } else {
       report.failed += 1;
+      const exhausted = post.attempts + 1 >= BACKOFF_MINUTES.length;
       report.details.push({
         postId: post.id,
-        status: post.attempts + 1 >= BACKOFF_MINUTES.length ? "failed_final" : "retry_scheduled",
+        status: exhausted ? "failed_final" : "retry_scheduled",
         reason: outcome.failureReason ?? undefined,
       });
+      if (exhausted) {
+        const owner = await data.users.findById(post.userId);
+        if (owner) {
+          const reasons = outcome.results.filter((r) => !r.ok).map((r) => `${r.network}: ${r.message}`);
+          await sendEmail(publishFailedEmail(owner.email, post.title, reasons)).catch(() => {});
+        }
+      }
     }
   }
 
