@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Database } from "lucide-react";
+import { Database, Download } from "lucide-react";
 import { Tabs } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { StreamChart } from "@/components/charts/stream-chart";
 import { TimingHeatmap } from "@/components/charts/timing-heatmap";
 import { EngagementFunnel } from "@/components/charts/funnel";
 import { StatTile, SectionCard } from "@/components/studio/primitives";
 import { NETWORKS } from "@/lib/constants";
+import { analyticsToCsv } from "@/lib/analytics/csv";
 import type { AnalyticsBundle } from "@/lib/types";
 import { percent } from "@/lib/utils";
 
@@ -27,6 +29,16 @@ export function AnalyticsBoard({
   const [days, setDays] = useState("90");
   const [bundle, setBundle] = useState(initial);
   const [loading, setLoading] = useState(false);
+
+  function exportCsv() {
+    const blob = new Blob([analyticsToCsv(bundle)], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `aetheria-analytics-${days}d.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   useEffect(() => {
     if (days === "90") {
@@ -50,10 +62,15 @@ export function AnalyticsBoard({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs value={days} onChange={setDays} items={RANGES} />
-        <span className="flex items-center gap-1.5 text-xs text-[var(--faint-foreground)]">
-          <Database size={12} /> {engine}
-          {loading ? " . updating" : ""}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="hidden items-center gap-1.5 text-xs text-[var(--faint-foreground)] sm:flex">
+            <Database size={12} /> {engine}
+            {loading ? " . updating" : ""}
+          </span>
+          <Button size="sm" variant="outline" magnetic={false} onClick={exportCsv}>
+            <Download size={13} /> Export CSV
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

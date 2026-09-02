@@ -24,7 +24,7 @@ export default async function CalendarPage() {
     <div>
       <PageHeader
         title="The Dial"
-        description="A radial read on today and a week you can rearrange. Drag never needed, just tap to reschedule."
+        description="A radial read on today and a week you can rearrange. Drag a signal between days, or tap it for an exact time."
       />
       <TheDial posts={scheduled} goldenWindows={analytics.goldenWindows} timezone={user.timezone} />
     </div>

@@ -76,43 +76,97 @@ async function publishLinkedIn(
   };
 }
 
-async function publishGraph(
+const GRAPH = "https://graph.facebook.com/v21.0";
+
+async function graphPost(node: string, params: Record<string, string>) {
+  const res = await fetch(`${GRAPH}/${node}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(params),
+  });
+  const json = (await res.json()) as { id?: string; status_code?: string; error?: { message: string } };
+  return { ok: res.ok, status: res.status, json };
+}
+
+async function publishFacebook(text: string, token: string, account: AdapterAccount, mediaUrl: string | null) {
+  const params: Record<string, string> = { access_token: token, message: text };
+  if (mediaUrl) params.link = mediaUrl;
+  const { ok, status, json } = await graphPost(`${account.handle}/feed`, params);
+  if (!ok || !json.id) {
+    return { ok: false, remoteId: null, permalink: null, message: json.error?.message ?? `HTTP ${status}` };
+  }
+  return {
+    ok: true,
+    remoteId: json.id,
+    permalink: `https://www.facebook.com/${json.id}`,
+    message: "Published to Facebook",
+  };
+}
+
+/**
+ * Instagram content publishing is a two step Graph flow: create a media
+ * container, then publish it. The container can take a moment to finish
+ * processing, so we poll its status once before the publish call.
+ */
+async function publishInstagram(text: string, token: string, account: AdapterAccount, mediaUrl: string | null) {
+  if (!mediaUrl) {
+    return { ok: false, remoteId: null, permalink: null, message: "Instagram requires an image" };
+  }
+
+  const container = await graphPost(`${account.handle}/media`, {
+    access_token: token,
+    image_url: mediaUrl,
+    caption: text,
+  });
+  if (!container.ok || !container.json.id) {
+    return {
+      ok: false,
+      remoteId: null,
+      permalink: null,
+      message: container.json.error?.message ?? `container failed (HTTP ${container.status})`,
+    };
+  }
+  const creationId = container.json.id;
+
+  // One status poll: FINISHED means ready, IN_PROGRESS gets a short wait.
+  const status: { status_code?: string } = await fetch(
+    `${GRAPH}/${creationId}?fields=status_code&access_token=${encodeURIComponent(token)}`,
+  )
+    .then((r) => r.json())
+    .catch(() => ({}));
+  if (status.status_code === "IN_PROGRESS") {
+    await new Promise((r) => setTimeout(r, 4000));
+  }
+
+  const publish = await graphPost(`${account.handle}/media_publish`, {
+    access_token: token,
+    creation_id: creationId,
+  });
+  if (!publish.ok || !publish.json.id) {
+    return {
+      ok: false,
+      remoteId: null,
+      permalink: null,
+      message: publish.json.error?.message ?? `publish failed (HTTP ${publish.status})`,
+    };
+  }
+  return {
+    ok: true,
+    remoteId: publish.json.id,
+    permalink: `https://www.instagram.com/p/${publish.json.id}`,
+    message: "Published to Instagram",
+  };
+}
+
+function publishGraph(
   text: string,
   token: string,
   account: AdapterAccount,
   mediaUrl: string | null,
 ): Promise<PublishOutcome> {
-  const isFacebook = account.network === "facebook";
-  const node = isFacebook ? `${account.handle}/feed` : `${account.handle}/media`;
-  const payload: Record<string, unknown> = { access_token: token };
-  if (isFacebook) {
-    payload.message = text;
-    if (mediaUrl) payload.link = mediaUrl;
-  } else {
-    // Instagram content publishing needs an image URL for the media container.
-    payload.caption = text;
-    if (mediaUrl) payload.image_url = mediaUrl;
-  }
-  const res = await fetch(`https://graph.facebook.com/v21.0/${node}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const json = (await res.json()) as { id?: string; error?: { message: string } };
-  if (!res.ok || !json.id) {
-    return {
-      ok: false,
-      remoteId: null,
-      permalink: null,
-      message: json.error?.message ?? `HTTP ${res.status}`,
-    };
-  }
-  return {
-    ok: true,
-    remoteId: json.id,
-    permalink: `https://www.${account.network}.com/${json.id}`,
-    message: `Published to ${account.network}`,
-  };
+  return account.network === "facebook"
+    ? publishFacebook(text, token, account, mediaUrl)
+    : publishInstagram(text, token, account, mediaUrl);
 }
 
 export function createRealAdapter(id: NetworkId): SocialAdapter {

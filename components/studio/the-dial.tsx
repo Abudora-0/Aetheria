@@ -11,6 +11,8 @@ import { Dialog } from "@/components/ui/dialog";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { useMotionPrefs } from "@/components/system/motion-prefs";
+import { cn } from "@/lib/utils";
 
 /** Polar to cartesian around a centre, rounded so SSR and client agree. */
 function polar(center: number, degrees: number, radius: number) {
@@ -32,12 +34,49 @@ export function TheDial({
 }) {
   const router = useRouter();
   const toast = useToast();
+  const { reduced } = useMotionPrefs();
   const [weekOffset, setWeekOffset] = useState(0);
   const [editing, setEditing] = useState<PostRecord | null>(null);
   const [when, setWhen] = useState<Date | null>(null);
   const [saving, setSaving] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState<string | null>(null);
   useEffect(() => setMounted(true), []);
+
+  async function rescheduleTo(postId: string, iso: string, successMsg = "Moved on The Dial") {
+    const res = await fetch(`/api/posts/${postId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: "reschedule", scheduledFor: iso }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast.error(json.error ?? "Could not reschedule");
+      return false;
+    }
+    toast.success(successMsg);
+    router.refresh();
+    return true;
+  }
+
+  async function dropOnDay(day: Date) {
+    setDragOver(null);
+    const id = dragId;
+    setDragId(null);
+    if (!id) return;
+    const post = posts.find((p) => p.id === id);
+    if (!post?.scheduledFor) return;
+    const current = new Date(post.scheduledFor);
+    if (isSameDay(current, day)) return;
+    const next = new Date(day);
+    next.setHours(current.getHours(), current.getMinutes(), 0, 0);
+    if (next.getTime() < Date.now()) {
+      toast.error("That day is in the past");
+      return;
+    }
+    await rescheduleTo(id, next.toISOString(), `Moved to ${format(next, "EEE d, HH:mm")}`);
+  }
 
   const weekStart = useMemo(
     () => addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), weekOffset * 7),
@@ -54,19 +93,7 @@ export function TheDial({
     if (!editing || !when) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/posts/${editing.id}`, {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action: "reschedule", scheduledFor: when.toISOString() }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        toast.error(json.error ?? "Could not reschedule");
-        return;
-      }
-      toast.success("Moved on The Dial");
-      setEditing(null);
-      router.refresh();
+      if (await rescheduleTo(editing.id, when.toISOString())) setEditing(null);
     } finally {
       setSaving(false);
     }
@@ -158,18 +185,37 @@ export function TheDial({
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+        {!reduced ? (
+          <p className="mb-2 text-[0.65rem] text-[var(--faint-foreground)]">
+            Drag a signal to another day, or tap it to set an exact time.
+          </p>
+        ) : null}
+
+        <div className="flex gap-2 overflow-x-auto pb-1 lg:grid lg:grid-cols-7 lg:overflow-visible">
           {days.map((day) => {
             const dayPosts = posts
               .filter((p) => p.scheduledFor && isSameDay(new Date(p.scheduledFor), day))
               .sort((a, b) => a.scheduledFor!.localeCompare(b.scheduledFor!));
             const isToday = isSameDay(day, today);
+            const key = day.toISOString();
             return (
               <div
-                key={day.toISOString()}
-                className={`min-h-[140px] rounded-[var(--radius-md)] border p-2 ${
-                  isToday ? "border-[var(--aurora-violet)]" : "border-[var(--border)]"
-                }`}
+                key={key}
+                onDragOver={(e) => {
+                  if (reduced || !dragId) return;
+                  e.preventDefault();
+                  setDragOver(key);
+                }}
+                onDragLeave={() => setDragOver((d) => (d === key ? null : d))}
+                onDrop={() => void dropOnDay(day)}
+                className={cn(
+                  "min-h-[144px] w-[132px] shrink-0 rounded-[var(--radius-md)] border p-2 transition-colors lg:w-auto",
+                  dragOver === key
+                    ? "border-[var(--aurora-teal)] bg-[color-mix(in_oklab,var(--aurora-teal)_10%,transparent)]"
+                    : isToday
+                      ? "border-[var(--aurora-violet)]"
+                      : "border-[var(--border)]",
+                )}
               >
                 <p className="mb-2 text-[0.65rem] uppercase tracking-wide text-[var(--faint-foreground)]">
                   {format(day, "EEE d")}
@@ -178,11 +224,21 @@ export function TheDial({
                   {dayPosts.map((p) => (
                     <button
                       key={p.id}
+                      draggable={!reduced}
+                      onDragStart={() => setDragId(p.id)}
+                      onDragEnd={() => {
+                        setDragId(null);
+                        setDragOver(null);
+                      }}
                       onClick={() => {
                         setEditing(p);
                         setWhen(new Date(p.scheduledFor!));
                       }}
-                      className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-raise)] p-1.5 text-left transition-colors hover:border-[var(--border-strong)]"
+                      className={cn(
+                        "w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-raise)] p-1.5 text-left transition-all hover:border-[var(--border-strong)]",
+                        !reduced && "cursor-grab active:cursor-grabbing",
+                        dragId === p.id && "opacity-40",
+                      )}
                     >
                       <span className="flex items-center gap-1">
                         {p.networks.slice(0, 3).map((n) => {
