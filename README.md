@@ -193,7 +193,10 @@ other keys from `.env.example` to enable Stripe, Cloudinary and each social netw
 
 When a network's credentials are set, "Connect" on the Token Vault runs the real OAuth
 2.0 flow. Register each app with the callback URL
-`<NEXT_PUBLIC_APP_URL>/api/oauth/<network>/callback`.
+`<NEXT_PUBLIC_APP_URL>/api/oauth/<network>/callback`. X uses OAuth 2.0 with PKCE,
+LinkedIn and Facebook use the Meta / LinkedIn OAuth flows, and Instagram uses the
+"Instagram API with Instagram Login" flow (its own app credentials, a long lived token
+that self refreshes, and publishing through `graph.instagram.com`).
 
 ## Scripts
 

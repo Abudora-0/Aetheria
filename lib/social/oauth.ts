@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { env } from "@/lib/env";
 import type { NetworkId } from "@/lib/constants";
+import { igExchangeCode, igFetchProfile, igRefresh } from "@/lib/social/instagram";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -60,13 +61,14 @@ const PROVIDERS: Record<NetworkId, ProviderConfig> = {
     parseProfile: (j) => ({ handle: j?.id ?? "me", displayName: j?.name ?? "Your page" }),
   },
   instagram: {
-    authorizeUrl: "https://www.facebook.com/v21.0/dialog/oauth",
-    tokenUrl: "https://graph.facebook.com/v21.0/oauth/access_token",
-    scopes: "public_profile instagram_basic instagram_content_publish pages_show_list",
+    // Instagram API with Instagram Login. The code flow, token swap, refresh and
+    // profile read are handled by lib/social/instagram.ts; only the authorize URL
+    // is built through the generic path below.
+    authorizeUrl: "https://www.instagram.com/oauth/authorize",
+    tokenUrl: "https://api.instagram.com/oauth/access_token",
+    scopes: "instagram_business_basic,instagram_business_content_publish",
     pkce: false,
     clientAuth: "body",
-    profileUrl: "https://graph.facebook.com/v21.0/me?fields=id,name",
-    parseProfile: (j) => ({ handle: j?.id ?? "me", displayName: j?.name ?? "Your account" }),
   },
 };
 
@@ -124,6 +126,7 @@ export async function exchangeCodeForTokens(
   network: NetworkId,
   opts: { code: string; codeVerifier?: string },
 ): Promise<OAuthTokens> {
+  if (network === "instagram") return igExchangeCode(opts.code);
   const app = env.social[network];
   const body = new URLSearchParams({
     grant_type: "authorization_code",
@@ -150,6 +153,7 @@ export async function refreshAccessToken(
   network: NetworkId,
   refreshToken: string,
 ): Promise<OAuthTokens> {
+  if (network === "instagram") return igRefresh(refreshToken);
   const app = env.social[network];
   const body = new URLSearchParams({
     grant_type: "refresh_token",
@@ -172,6 +176,7 @@ export async function fetchProfile(
   network: NetworkId,
   accessToken: string,
 ): Promise<ConnectProfile> {
+  if (network === "instagram") return igFetchProfile(accessToken);
   const cfg = PROVIDERS[network];
   if (!cfg.profileUrl) return { handle: "you", displayName: "Your channel" };
   try {

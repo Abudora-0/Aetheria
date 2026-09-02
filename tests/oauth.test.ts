@@ -51,4 +51,12 @@ describe("oauth helpers", () => {
     expect(url.searchParams.has("code_challenge")).toBe(false);
     expect(url.searchParams.get("scope")).toContain("w_member_social");
   });
+
+  it("builds an Instagram Login authorize URL on instagram.com", () => {
+    const url = new URL(buildAuthorizeUrl("instagram", { state: "s" }));
+    expect(url.origin + url.pathname).toBe("https://www.instagram.com/oauth/authorize");
+    expect(url.searchParams.get("scope")).toContain("instagram_business_content_publish");
+    expect(url.searchParams.has("code_challenge")).toBe(false);
+    expect(url.searchParams.get("redirect_uri")).toBe(oauthRedirectUri("instagram"));
+  });
 });

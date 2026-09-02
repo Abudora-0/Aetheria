@@ -103,20 +103,31 @@ async function publishFacebook(text: string, token: string, account: AdapterAcco
   };
 }
 
+const IG_GRAPH = "https://graph.instagram.com/v21.0";
+
+async function igGraphPost(node: string, params: Record<string, string>) {
+  const url = new URL(`${IG_GRAPH}/${node}`);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+  const res = await fetch(url, { method: "POST" });
+  const json = (await res.json()) as { id?: string; status_code?: string; error?: { message: string } };
+  return { ok: res.ok, status: res.status, json };
+}
+
 /**
- * Instagram content publishing is a two step Graph flow: create a media
- * container, then publish it. The container can take a moment to finish
- * processing, so we poll its status once before the publish call.
+ * Instagram content publishing (Instagram API with Instagram Login) is a two
+ * step flow on graph.instagram.com: create a media container from a public
+ * image URL, wait for it to finish processing, then publish it. The token is
+ * scoped to one Instagram user so "me" resolves to that account.
  */
-async function publishInstagram(text: string, token: string, account: AdapterAccount, mediaUrl: string | null) {
+async function publishInstagram(text: string, token: string, mediaUrl: string | null) {
   if (!mediaUrl) {
     return { ok: false, remoteId: null, permalink: null, message: "Instagram requires an image" };
   }
 
-  const container = await graphPost(`${account.handle}/media`, {
-    access_token: token,
+  const container = await igGraphPost("me/media", {
     image_url: mediaUrl,
     caption: text,
+    access_token: token,
   });
   if (!container.ok || !container.json.id) {
     return {
@@ -128,19 +139,25 @@ async function publishInstagram(text: string, token: string, account: AdapterAcc
   }
   const creationId = container.json.id;
 
-  // One status poll: FINISHED means ready, IN_PROGRESS gets a short wait.
-  const status: { status_code?: string } = await fetch(
-    `${GRAPH}/${creationId}?fields=status_code&access_token=${encodeURIComponent(token)}`,
-  )
-    .then((r) => r.json())
-    .catch(() => ({}));
-  if (status.status_code === "IN_PROGRESS") {
-    await new Promise((r) => setTimeout(r, 4000));
+  // Poll the container until it finishes processing (image containers are
+  // usually ready within a few seconds).
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const statusUrl = new URL(`${IG_GRAPH}/${creationId}`);
+    statusUrl.searchParams.set("fields", "status_code");
+    statusUrl.searchParams.set("access_token", token);
+    const status = (await fetch(statusUrl)
+      .then((r) => r.json())
+      .catch(() => ({}))) as { status_code?: string };
+    if (status.status_code === "FINISHED") break;
+    if (status.status_code === "ERROR" || status.status_code === "EXPIRED") {
+      return { ok: false, remoteId: null, permalink: null, message: `media container ${status.status_code}` };
+    }
+    await new Promise((r) => setTimeout(r, 3000));
   }
 
-  const publish = await graphPost(`${account.handle}/media_publish`, {
-    access_token: token,
+  const publish = await igGraphPost("me/media_publish", {
     creation_id: creationId,
+    access_token: token,
   });
   if (!publish.ok || !publish.json.id) {
     return {
@@ -150,12 +167,20 @@ async function publishInstagram(text: string, token: string, account: AdapterAcc
       message: publish.json.error?.message ?? `publish failed (HTTP ${publish.status})`,
     };
   }
-  return {
-    ok: true,
-    remoteId: publish.json.id,
-    permalink: `https://www.instagram.com/p/${publish.json.id}`,
-    message: "Published to Instagram",
-  };
+
+  // Best effort: resolve the real permalink for the published media.
+  let permalink: string | null = null;
+  try {
+    const permUrl = new URL(`${IG_GRAPH}/${publish.json.id}`);
+    permUrl.searchParams.set("fields", "permalink");
+    permUrl.searchParams.set("access_token", token);
+    const perm = (await fetch(permUrl).then((r) => r.json())) as { permalink?: string };
+    permalink = perm.permalink ?? null;
+  } catch {
+    permalink = null;
+  }
+
+  return { ok: true, remoteId: publish.json.id, permalink, message: "Published to Instagram" };
 }
 
 function publishGraph(
@@ -166,7 +191,7 @@ function publishGraph(
 ): Promise<PublishOutcome> {
   return account.network === "facebook"
     ? publishFacebook(text, token, account, mediaUrl)
-    : publishInstagram(text, token, account, mediaUrl);
+    : publishInstagram(text, token, mediaUrl);
 }
 
 export function createRealAdapter(id: NetworkId): SocialAdapter {
