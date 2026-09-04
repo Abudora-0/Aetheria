@@ -12,7 +12,7 @@ import { ProgressRing } from "@/components/ui/progress-ring";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
 import { useToast } from "@/components/ui/toast";
 import { nextGoldenSlot } from "@/lib/posts/compose";
-import { cn } from "@/lib/utils";
+import { cn, compactNumber } from "@/lib/utils";
 import { NetworkPreview } from "@/components/studio/network-preview";
 
 export function Composer({
@@ -252,7 +252,7 @@ export function Composer({
                   value={len / limit}
                   size={34}
                   stroke={3}
-                  label={`${Math.max(0, limit - len)}`}
+                  label={compactNumber(Math.max(0, limit - len), 0)}
                   tone={NETWORKS[n].accent}
                 />
               );
