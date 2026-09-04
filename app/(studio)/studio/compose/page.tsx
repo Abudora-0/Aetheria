@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getData } from "@/lib/data";
+import { getAccountsForUser } from "@/lib/data/request-cache";
 import { getAnalytics } from "@/lib/analytics/service";
 import { Composer } from "@/components/studio/composer";
 import { PageHeader } from "@/components/studio/primitives";
@@ -17,7 +18,7 @@ export default async function ComposePage({
   const user = (await getCurrentUser())!;
   const data = await getData();
   const [accounts, analytics, existing] = await Promise.all([
-    data.accounts.listByUser(user.id),
+    getAccountsForUser(user.id),
     getAnalytics(user.id, 90, user.timezone),
     id ? data.posts.findById(user.id, id) : Promise.resolve(null),
   ]);

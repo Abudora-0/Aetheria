@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import { env } from "@/lib/env";
@@ -42,12 +43,18 @@ export async function getSessionUserId(): Promise<string | null> {
   }
 }
 
-export async function getCurrentUser(): Promise<SessionUser | null> {
+/**
+ * Every studio layout and page independently calls getCurrentUser(), which
+ * would otherwise mean one repeated Mongo round trip per navigation for the
+ * same request. React's cache() memoizes it per render pass, so only the
+ * first call in a given request actually hits the database.
+ */
+export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const id = await getSessionUserId();
   if (!id) return null;
   const data = await getData();
   return data.users.findById(id);
-}
+});
 
 export async function requireUser(): Promise<SessionUser> {
   const user = await getCurrentUser();

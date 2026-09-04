@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getData } from "@/lib/data";
+import { getPostsForUser } from "@/lib/data/request-cache";
 import { getAnalytics } from "@/lib/analytics/service";
 import { PageHeader } from "@/components/studio/primitives";
 import { TheDial } from "@/components/studio/the-dial";
@@ -10,9 +10,8 @@ export const dynamic = "force-dynamic";
 
 export default async function CalendarPage() {
   const user = (await getCurrentUser())!;
-  const data = await getData();
   const [posts, analytics] = await Promise.all([
-    data.posts.listByUser(user.id),
+    getPostsForUser(user.id),
     getAnalytics(user.id, 90, user.timezone),
   ]);
 

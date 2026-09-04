@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getData } from "@/lib/data";
+import { getPostsForUser } from "@/lib/data/request-cache";
 import { PageHeader } from "@/components/studio/primitives";
 import { SignalQueue } from "@/components/studio/signal-queue";
 
@@ -9,8 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function QueuePage() {
   const user = (await getCurrentUser())!;
-  const data = await getData();
-  const posts = await data.posts.listByUser(user.id);
+  const [data, posts] = await Promise.all([getData(), getPostsForUser(user.id)]);
 
   const queue = posts.filter((p) =>
     ["scheduled", "publishing", "failed"].includes(p.status),

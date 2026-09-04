@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getData } from "@/lib/data";
+import { getAccountsForUser } from "@/lib/data/request-cache";
 import { adapterStatus } from "@/lib/social";
 import { PageHeader } from "@/components/studio/primitives";
 import { TokenVault } from "@/components/studio/token-vault";
@@ -14,8 +14,7 @@ export default async function AccountsPage({
   searchParams: Promise<{ connected?: string; error?: string; mode?: string }>;
 }) {
   const user = (await getCurrentUser())!;
-  const data = await getData();
-  const accounts = await data.accounts.listByUser(user.id);
+  const accounts = await getAccountsForUser(user.id);
   const params = await searchParams;
 
   return (

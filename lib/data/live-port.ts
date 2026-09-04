@@ -206,6 +206,8 @@ export const livePort: DataPort = {
       const set: Record<string, unknown> = {
         lastRefreshedAt: new Date(),
         status: "healthy",
+        handle: tokens?.handle ?? "you",
+        displayName: tokens?.displayName ?? "Your channel",
       };
       if (tokens) {
         set.accessTokenCipher = encryptToken(tokens.accessToken);
@@ -213,22 +215,20 @@ export const livePort: DataPort = {
           ? encryptToken(tokens.refreshToken)
           : null;
         set.tokenExpiresAt = new Date(now + tokens.expiresIn * 1000);
-        if (tokens.handle) set.handle = tokens.handle;
-        if (tokens.displayName) set.displayName = tokens.displayName;
       } else {
         // Sandbox connection: no real OAuth app configured.
         set.accessTokenCipher = encryptToken(`sandbox-access-${network}-${now}`);
         set.refreshTokenCipher = encryptToken(`sandbox-refresh-${network}-${now}`);
         set.tokenExpiresAt = new Date(now + 55 * DAY);
       }
+      // handle/displayName only ever go through $set (never $setOnInsert too):
+      // Mongo rejects an upsert that touches the same path from both operators.
       const doc = await Account.findOneAndUpdate(
         { userId, network },
         {
           $setOnInsert: {
             userId,
             network,
-            handle: tokens?.handle ?? "you",
-            displayName: tokens?.displayName ?? "Your channel",
             avatarColor: meta.accent,
             followers: 120 + Math.floor(Math.random() * 900),
           },

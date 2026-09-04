@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getData } from "@/lib/data";
+import { getAccountsForUser, getPostsForUser, getSubscriptionForUser } from "@/lib/data/request-cache";
 import { planCatalogue, stripeConfigured } from "@/lib/stripe";
 import { PageHeader } from "@/components/studio/primitives";
 import { BillingPanel } from "@/components/studio/billing-panel";
@@ -10,11 +10,10 @@ export const dynamic = "force-dynamic";
 
 export default async function BillingPage() {
   const user = (await getCurrentUser())!;
-  const data = await getData();
   const [subscription, posts, accounts] = await Promise.all([
-    data.subscription.forUser(user.id),
-    data.posts.listByUser(user.id),
-    data.accounts.listByUser(user.id),
+    getSubscriptionForUser(user.id),
+    getPostsForUser(user.id),
+    getAccountsForUser(user.id),
   ]);
 
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();

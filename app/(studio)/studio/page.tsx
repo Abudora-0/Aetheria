@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowUpRight } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getData } from "@/lib/data";
+import { getAccountsForUser, getPostsForUser } from "@/lib/data/request-cache";
 import { getAnalytics } from "@/lib/analytics/service";
 import { PageHeader, StatTile } from "@/components/studio/primitives";
 import { StreamChart } from "@/components/charts/stream-chart";
@@ -16,11 +16,10 @@ export const dynamic = "force-dynamic";
 
 export default async function OverviewPage() {
   const user = (await getCurrentUser())!;
-  const data = await getData();
   const [posts, analytics, accounts] = await Promise.all([
-    data.posts.listByUser(user.id),
+    getPostsForUser(user.id),
     getAnalytics(user.id, 60, user.timezone),
-    data.accounts.listByUser(user.id),
+    getAccountsForUser(user.id),
   ]);
 
   const upcoming = posts
