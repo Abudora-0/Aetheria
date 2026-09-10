@@ -38,7 +38,7 @@ export function Sparkline({
         stroke={`url(#sp-${gid})`}
         strokeWidth={1.75}
         strokeLinecap="round"
-        initial={{ pathLength: 0 }}
+        initial={false}
         animate={{ pathLength: 1 }}
         transition={{ duration: 1, ease: "easeOut" }}
       />

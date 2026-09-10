@@ -16,11 +16,7 @@ export function PageHeader({
 }) {
   return (
     <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
+      <motion.div initial={{ y: 10 }} animate={{ y: 0 }} transition={{ duration: 0.4 }}>
         <h1 className="text-2xl md:text-[1.7rem]">{title}</h1>
         {description ? (
           <p className="mt-1 max-w-xl text-sm text-[var(--muted-foreground)]">{description}</p>

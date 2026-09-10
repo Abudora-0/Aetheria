@@ -12,7 +12,7 @@ import { percent } from "@/lib/utils";
 export function AnalyticsPreview({ bundle }: { bundle: AnalyticsBundle }) {
   return (
     <section id="analytics" className="relative z-10 mx-auto max-w-[var(--shell-max)] px-6 py-28">
-      <div className="mb-14 grid gap-8 md:grid-cols-[1fr_1.1fr] md:items-end">
+      <div className="mb-14 grid grid-cols-1 gap-8 md:grid-cols-[1fr_1.1fr] md:items-end">
         <div>
           <p className="text-sm font-medium uppercase tracking-widest text-[var(--aurora-magenta)]">
             Aurora analytics
@@ -45,10 +45,10 @@ export function AnalyticsPreview({ bundle }: { bundle: AnalyticsBundle }) {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr]">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ y: 20 }}
+          whileInView={{ y: 0 }}
           viewport={{ once: true }}
           className="panel p-5"
         >
@@ -63,8 +63,8 @@ export function AnalyticsPreview({ bundle }: { bundle: AnalyticsBundle }) {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ y: 20 }}
+          whileInView={{ y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
           className="panel p-5"
@@ -74,8 +74,8 @@ export function AnalyticsPreview({ bundle }: { bundle: AnalyticsBundle }) {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ y: 20 }}
+          whileInView={{ y: 0 }}
           viewport={{ once: true }}
           className="panel p-5 lg:col-span-2"
         >

@@ -10,8 +10,8 @@ export function CtaBand() {
   return (
     <section className="relative z-10 mx-auto max-w-[var(--shell-max)] px-6 pb-28">
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ y: 24 }}
+        whileInView={{ y: 0 }}
         viewport={{ once: true }}
         className="group panel relative overflow-hidden px-6 py-14 text-center sm:px-8 sm:py-16"
       >

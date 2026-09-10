@@ -56,7 +56,7 @@ export default async function OverviewPage() {
         <StatTile label="Signals published" value={published} format="plain" />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr]">
         <section className="panel p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-medium text-[var(--muted-foreground)]">Impression growth</h2>
@@ -73,7 +73,7 @@ export default async function OverviewPage() {
         <GoldenWindows windows={analytics.goldenWindows} />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr]">
         <UpcomingSignals posts={upcoming} />
 
         <section className="panel p-5">

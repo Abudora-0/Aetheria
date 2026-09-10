@@ -100,8 +100,8 @@ export function TheDial({
   }
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
-      <section className="panel flex flex-col items-center p-6">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
+      <section className="panel flex min-w-0 flex-col items-center p-6">
         <h2 className="self-start text-sm font-medium text-[var(--muted-foreground)]">
           Today, {format(today, "EEEE d")}
         </h2>
@@ -134,7 +134,7 @@ export function TheDial({
               return (
                 <motion.circle
                   key={post.id}
-                  initial={{ scale: 0 }}
+                  initial={{ scale: 0.5 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: i * 0.06, type: "spring" }}
                   cx={p.x}
@@ -166,7 +166,7 @@ export function TheDial({
         </p>
       </section>
 
-      <section className="panel p-4">
+      <section className="panel min-w-0 p-4">
         <div className="mb-3 flex items-center justify-between">
           <button
             onClick={() => setWeekOffset((w) => w - 1)}

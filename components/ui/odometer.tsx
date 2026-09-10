@@ -56,7 +56,16 @@ export function Odometer({
         setDisplay((prev) => (prev === next ? prev : next));
       },
     });
-    return () => controls.stop();
+    // Safety net: if the count animation is frozen or throttled (iOS Low Power
+    // Mode, backgrounded tab), never leave the number stuck at 0.
+    const settle = setTimeout(
+      () => setDisplay(render(value, format)),
+      duration * 1000 + 400,
+    );
+    return () => {
+      controls.stop();
+      clearTimeout(settle);
+    };
   }, [inView, value, format, duration, mv, reduced]);
 
   return (

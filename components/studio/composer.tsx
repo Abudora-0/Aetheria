@@ -111,7 +111,7 @@ export function Composer({
   }
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_1fr]">
       <div className="space-y-4">
         <div className="panel p-5">
           <Field label="Internal title" className="mb-4">
@@ -264,7 +264,7 @@ export function Composer({
             Select a channel to preview
           </div>
         ) : (
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence mode="popLayout" initial={false}>
             {selected.map((n) => (
               <motion.div
                 key={n}

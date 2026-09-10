@@ -23,9 +23,8 @@ export function EngagementFunnel({ stages }: { stages: { stage: string; value: n
             <div className="h-2.5 overflow-hidden rounded-full bg-[var(--bg-sink)]">
               <motion.div
                 className="h-full rounded-full [background:var(--aurora-gradient)]"
-                initial={{ width: 0 }}
-                whileInView={{ width: `${Math.max(4, ratio * 100)}%` }}
-                viewport={{ once: true }}
+                initial={false}
+                animate={{ width: `${Math.max(4, ratio * 100)}%` }}
                 transition={{ duration: 0.8, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
               />
             </div>

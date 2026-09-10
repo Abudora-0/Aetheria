@@ -84,12 +84,13 @@ export function StreamChart({ data, height = 240, className }: StreamChartProps)
           />
         ))}
 
+        {/* initial={false}: the draw-in is cosmetic; a chart that renders blank
+            because the animation froze (Low Power Mode, in-app browser) is not. */}
         <motion.path
           d={areaPath}
           fill={`url(#fill-${gid})`}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          initial={false}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
         />
         <motion.path
@@ -98,9 +99,8 @@ export function StreamChart({ data, height = 240, className }: StreamChartProps)
           stroke={`url(#stroke-${gid})`}
           strokeWidth={2.5}
           strokeLinecap="round"
-          initial={{ pathLength: 0 }}
-          whileInView={{ pathLength: 1 }}
-          viewport={{ once: true }}
+          initial={false}
+          animate={{ pathLength: 1 }}
           transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
         />
 

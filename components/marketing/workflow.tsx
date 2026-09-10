@@ -51,15 +51,15 @@ export function Workflow() {
           {STEPS.map((s, i) => (
             <motion.div
               key={s.k}
-              initial={{ opacity: 0, x: 24 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ x: 24 }}
+              whileInView={{ x: 0 }}
               viewport={{ once: true, margin: "-120px" }}
               transition={{ duration: 0.5 }}
               className="relative"
             >
               <motion.span
-                initial={{ scale: 0, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
+                initial={{ scale: 0.4 }}
+                whileInView={{ scale: 1 }}
                 viewport={{ once: true, margin: "-120px" }}
                 transition={{ type: "spring", stiffness: 400, damping: 18, delay: 0.15 }}
                 className="absolute -left-[2.35rem] top-0 grid h-6 w-6 place-items-center rounded-full border border-[var(--border-strong)] bg-[var(--bg)] font-mono text-[0.6rem] text-[var(--aurora-violet)] md:-left-[3.35rem]"

@@ -141,8 +141,8 @@ export function BillingPanel({
           return (
             <motion.div
               key={plan.id}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ y: 16 }}
+              animate={{ y: 0 }}
               className={`panel relative flex flex-col p-5 ${
                 active ? "border-[var(--aurora-violet)]" : ""
               }`}

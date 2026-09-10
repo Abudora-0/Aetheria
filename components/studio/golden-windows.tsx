@@ -21,8 +21,8 @@ export function GoldenWindows({ windows }: { windows: GoldenWindow[] }) {
           {windows.map((w, i) => (
             <motion.li
               key={w.label}
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ x: 12 }}
+              animate={{ x: 0 }}
               transition={{ delay: i * 0.08 }}
               className="flex items-center gap-3"
             >

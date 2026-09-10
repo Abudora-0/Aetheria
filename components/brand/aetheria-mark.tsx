@@ -78,14 +78,10 @@ export function AetheriaMark({ size = 40, className, mode = "idle" }: AetheriaMa
           strokeLinecap="round"
           filter={glow}
           style={{ transformOrigin: "80px 80px" }}
-          initial={
-            mode === "trace" ? { scale: 0, opacity: 0 } : { scale: 1, opacity: ring.base }
-          }
-          animate={
-            mode === "trace"
-              ? { scale: 1, opacity: ring.base }
-              : { scale: 1, opacity: ring.base }
-          }
+          // Opacity always starts at its resting value so a frozen or skipped
+          // animation never leaves the mark invisible; trace only scales in.
+          initial={{ scale: mode === "trace" ? 0.3 : 1, opacity: ring.base }}
+          animate={{ scale: 1, opacity: ring.base }}
           transition={
             mode === "trace"
               ? { duration: 0.7, delay: i * 0.16, ease: [0.16, 1, 0.3, 1] }
