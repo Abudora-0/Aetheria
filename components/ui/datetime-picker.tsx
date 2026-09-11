@@ -24,7 +24,7 @@ interface DateTimePickerProps {
 
 // Rough height of the open popup (month grid + time dial + padding). Used to
 // decide whether it has room to drop down or needs to open upward instead.
-const POPUP_HEIGHT = 440;
+const POPUP_HEIGHT = 380;
 
 /** Date and time picker: a month grid paired with an orrery style 24 hour dial. */
 export function DateTimePicker({ value, onChange, minDate, className, label }: DateTimePickerProps) {
@@ -69,7 +69,7 @@ export function DateTimePicker({ value, onChange, minDate, className, label }: D
 
   function setHour(hour: number) {
     const next = new Date(current);
-    next.setHours(hour);
+    next.setHours(((hour % 24) + 24) % 24);
     onChange(next);
   }
 
@@ -78,8 +78,6 @@ export function DateTimePicker({ value, onChange, minDate, className, label }: D
     next.setMinutes((minute + 60) % 60);
     onChange(next);
   }
-
-  const hourAngle = (current.getHours() / 24) * 360;
 
   return (
     <div ref={rootRef} className={cn("relative", className)}>
@@ -161,69 +159,55 @@ export function DateTimePicker({ value, onChange, minDate, className, label }: D
               })}
             </div>
 
-            <div className="mt-3 flex items-center gap-3 border-t border-[var(--border)] pt-3">
-              <div className="relative h-24 w-24 shrink-0">
-                <svg viewBox="0 0 100 100" className="h-full w-full">
-                  <circle cx="50" cy="50" r="44" fill="none" stroke="var(--border)" strokeWidth="1" />
-                  {Array.from({ length: 24 }).map((_, h) => {
-                    const a = (h / 24) * 2 * Math.PI - Math.PI / 2;
-                    const x = 50 + Math.cos(a) * 44;
-                    const y = 50 + Math.sin(a) * 44;
-                    return (
-                      <circle
-                        key={h}
-                        cx={x}
-                        cy={y}
-                        r={h % 6 === 0 ? 2 : 1}
-                        className="cursor-pointer"
-                        fill={h === current.getHours() ? "var(--aurora-teal)" : "var(--faint-foreground)"}
-                        onClick={() => setHour(h)}
-                      />
-                    );
-                  })}
-                  <motion.line
-                    x1="50"
-                    y1="50"
-                    x2="50"
-                    y2="12"
-                    stroke="var(--aurora-violet)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    style={{ originX: "50px", originY: "50px" }}
-                    animate={{ rotate: hourAngle }}
-                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                  />
-                  <circle cx="50" cy="50" r="2.5" fill="var(--aurora-violet)" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="mb-1 text-[0.65rem] text-[var(--faint-foreground)]">Time</p>
-                <div className="flex items-center gap-1.5 font-mono text-lg text-[var(--foreground)]">
-                  <span>{String(current.getHours()).padStart(2, "0")}</span>
-                  <span className="text-[var(--faint-foreground)]">:</span>
-                  <div className="flex flex-col">
-                    <button
-                      onClick={() => setMinute(current.getMinutes() + 5)}
-                      className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-                    >
-                      +
-                    </button>
-                    <span>{String(current.getMinutes()).padStart(2, "0")}</span>
-                    <button
-                      onClick={() => setMinute(current.getMinutes() - 5)}
-                      className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-                    >
-                      -
-                    </button>
-                  </div>
+            <div className="mt-3 border-t border-[var(--border)] pt-3">
+              <p className="mb-2 text-center text-[0.65rem] text-[var(--faint-foreground)]">Time</p>
+              <div className="flex items-center justify-center gap-3 font-mono text-2xl text-[var(--foreground)]">
+                <div className="flex flex-col items-center gap-0.5">
+                  <button
+                    onClick={() => setHour(current.getHours() + 1)}
+                    aria-label="Hour up"
+                    className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                  >
+                    +
+                  </button>
+                  <span className="w-9 text-center tabular-nums">
+                    {String(current.getHours()).padStart(2, "0")}
+                  </span>
+                  <button
+                    onClick={() => setHour(current.getHours() - 1)}
+                    aria-label="Hour down"
+                    className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                  >
+                    -
+                  </button>
                 </div>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="mt-2 w-full rounded-[var(--radius-sm)] border border-[var(--border-strong)] py-1.5 text-xs text-[var(--foreground)] hover:bg-[var(--bg-sink)]"
-                >
-                  Done
-                </button>
+                <span className="text-[var(--faint-foreground)]">:</span>
+                <div className="flex flex-col items-center gap-0.5">
+                  <button
+                    onClick={() => setMinute(current.getMinutes() + 5)}
+                    aria-label="Minute up"
+                    className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                  >
+                    +
+                  </button>
+                  <span className="w-9 text-center tabular-nums">
+                    {String(current.getMinutes()).padStart(2, "0")}
+                  </span>
+                  <button
+                    onClick={() => setMinute(current.getMinutes() - 5)}
+                    aria-label="Minute down"
+                    className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                  >
+                    -
+                  </button>
+                </div>
               </div>
+              <button
+                onClick={() => setOpen(false)}
+                className="mt-3 w-full rounded-[var(--radius-sm)] border border-[var(--border-strong)] py-1.5 text-xs text-[var(--foreground)] hover:bg-[var(--bg-sink)]"
+              >
+                Done
+              </button>
             </div>
           </motion.div>
         ) : null}
