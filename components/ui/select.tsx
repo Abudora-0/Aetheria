@@ -112,7 +112,7 @@ export function Select<T extends string>({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ type: "spring", stiffness: 460, damping: 32 }}
-            className="glass absolute z-50 mt-1.5 max-h-64 w-full overflow-auto rounded-[var(--radius-md)] p-1 shadow-[var(--glow)]"
+            className="absolute z-50 mt-1.5 max-h-64 w-full overflow-auto rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface-solid)] p-1 shadow-[var(--glow)]"
           >
             {options.map((o, i) => {
               const isSelected = o.value === value;

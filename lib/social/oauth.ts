@@ -3,6 +3,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { env } from "@/lib/env";
 import type { NetworkId } from "@/lib/constants";
 import { igExchangeCode, igFetchProfile, igRefresh } from "@/lib/social/instagram";
+import { fbExchangeCode, fbRefresh } from "@/lib/social/facebook";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -52,9 +53,13 @@ const PROVIDERS: Record<NetworkId, ProviderConfig> = {
     parseProfile: (j) => ({ handle: j?.sub ?? "member", displayName: j?.name ?? "Your channel" }),
   },
   facebook: {
+    // Only the authorize URL runs through the generic path below; the code
+    // exchange and refresh swap the user token for a Page token (see
+    // lib/social/facebook.ts) because publishing needs a Page, not the
+    // personal profile /me resolves to on a plain user token.
     authorizeUrl: "https://www.facebook.com/v21.0/dialog/oauth",
     tokenUrl: "https://graph.facebook.com/v21.0/oauth/access_token",
-    scopes: "public_profile pages_manage_posts pages_read_engagement",
+    scopes: "public_profile pages_show_list pages_manage_posts pages_read_engagement",
     pkce: false,
     clientAuth: "body",
     profileUrl: "https://graph.facebook.com/v21.0/me?fields=id,name",
@@ -127,6 +132,7 @@ export async function exchangeCodeForTokens(
   opts: { code: string; codeVerifier?: string },
 ): Promise<OAuthTokens> {
   if (network === "instagram") return igExchangeCode(opts.code);
+  if (network === "facebook") return fbExchangeCode(opts.code);
   const app = env.social[network];
   const body = new URLSearchParams({
     grant_type: "authorization_code",
@@ -154,6 +160,7 @@ export async function refreshAccessToken(
   refreshToken: string,
 ): Promise<OAuthTokens> {
   if (network === "instagram") return igRefresh(refreshToken);
+  if (network === "facebook") return fbRefresh(refreshToken);
   const app = env.social[network];
   const body = new URLSearchParams({
     grant_type: "refresh_token",

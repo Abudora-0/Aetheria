@@ -87,7 +87,10 @@ export function DateTimePicker({ value, onChange, minDate, className, label }: D
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ type: "spring", stiffness: 440, damping: 32 }}
-            className="glass absolute z-50 mt-1.5 w-[320px] rounded-[var(--radius-lg)] p-3 shadow-[var(--glow)]"
+            /* Solid background, not .glass: this floats directly over page
+               content with no dimming backdrop, so a translucent panel let
+               the text behind it show through. */
+            className="absolute z-50 mt-1.5 w-[320px] rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-solid)] p-3 shadow-[var(--glow)]"
           >
             <div className="mb-2 flex items-center justify-between">
               <button

@@ -89,7 +89,7 @@ export function SiteHeader() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            className="glass absolute inset-x-3 top-[4.5rem] rounded-[var(--radius-lg)] p-2 shadow-[var(--glow)] md:hidden"
+            className="absolute inset-x-3 top-[4.5rem] rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-solid)] p-2 shadow-[var(--glow)] md:hidden"
           >
             {LINKS.map((l) => (
               <Link

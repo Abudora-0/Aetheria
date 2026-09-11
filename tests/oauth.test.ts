@@ -52,6 +52,14 @@ describe("oauth helpers", () => {
     expect(url.searchParams.get("scope")).toContain("w_member_social");
   });
 
+  it("requests pages_show_list for Facebook so the Page lookup can run", () => {
+    const url = new URL(buildAuthorizeUrl("facebook", { state: "s" }));
+    const scope = url.searchParams.get("scope") ?? "";
+    expect(scope).toContain("pages_show_list");
+    expect(scope).toContain("pages_manage_posts");
+    expect(scope).toContain("pages_read_engagement");
+  });
+
   it("builds an Instagram Login authorize URL on instagram.com", () => {
     const url = new URL(buildAuthorizeUrl("instagram", { state: "s" }));
     expect(url.origin + url.pathname).toBe("https://www.instagram.com/oauth/authorize");

@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { AetheriaMark } from "@/components/brand/aetheria-mark";
 import { AuthAsideMobile } from "@/components/auth/auth-aside";
@@ -161,13 +161,21 @@ export function AuthForm({ mode }: { mode: Mode }) {
             </Button>
 
             {!isSignUp ? (
-              <button
-                type="button"
-                onClick={fillDemo}
-                className="w-full rounded-[var(--radius-sm)] border border-dashed border-[var(--border-strong)] py-2 text-xs text-[var(--muted-foreground)] transition-colors hover:border-[var(--aurora-violet)] hover:text-[var(--foreground)]"
-              >
-                Use the demo account ({DEMO_USER.email} / {DEMO_USER.password})
-              </button>
+              <div className="space-y-1.5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  magnetic={false}
+                  onClick={fillDemo}
+                  className="w-full"
+                >
+                  <Sparkles size={14} className="text-[var(--aurora-gold)]" />
+                  Use the demo account
+                </Button>
+                <p className="text-center text-[0.7rem] text-[var(--faint-foreground)]">
+                  {DEMO_USER.email} / {DEMO_USER.password}
+                </p>
+              </div>
             ) : null}
           </div>
         </Row>

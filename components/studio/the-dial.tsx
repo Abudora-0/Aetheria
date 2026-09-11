@@ -107,26 +107,54 @@ export function TheDial({
         </h2>
         <div className="relative my-4 h-56 w-56">
           <svg viewBox="0 0 200 200" className="h-full w-full">
-            <circle cx="100" cy="100" r="86" fill="none" stroke="var(--border)" strokeWidth="1" />
+            <circle cx="100" cy="100" r="84" fill="none" stroke="var(--border-strong)" strokeWidth="1.5" />
             <circle cx="100" cy="100" r="60" fill="none" stroke="var(--border)" strokeWidth="1" strokeDasharray="2 4" />
             {Array.from({ length: 24 }).map((_, h) => {
-              const p = polar(100, (h / 24) * 360, 96);
+              const major = h % 6 === 0;
+              const tick = polar(100, (h / 24) * 360, 84);
+              const tickInner = polar(100, (h / 24) * 360, major ? 78 : 81);
+              return (
+                <line
+                  key={`tick-${h}`}
+                  x1={tick.x}
+                  y1={tick.y}
+                  x2={tickInner.x}
+                  y2={tickInner.y}
+                  stroke="var(--border-strong)"
+                  strokeWidth={major ? 1.4 : 0.75}
+                />
+              );
+            })}
+            {Array.from({ length: 24 }).map((_, h) => {
+              const p = polar(100, (h / 24) * 360, 93);
               return (
                 <text
                   key={h}
                   x={p.x}
                   y={p.y + 3}
                   textAnchor="middle"
-                  className="fill-[var(--faint-foreground)] font-mono"
-                  style={{ fontSize: 6 }}
+                  className="fill-[var(--muted-foreground)] font-mono font-medium"
+                  style={{ fontSize: 7.5 }}
                 >
                   {h % 6 === 0 ? String(h).padStart(2, "0") : ""}
                 </text>
               );
             })}
             {goldenWindows.map((w, i) => {
-              const p = polar(100, (w.hour / 24) * 360, 73);
-              return <circle key={i} cx={p.x} cy={p.y} r={3} fill="var(--aurora-gold)" opacity={0.5} />;
+              const p = polar(100, (w.hour / 24) * 360, 71);
+              return (
+                <circle
+                  key={i}
+                  cx={p.x}
+                  cy={p.y}
+                  r={3.5}
+                  fill="var(--aurora-gold)"
+                  opacity={0.75}
+                  stroke="var(--aurora-gold)"
+                  strokeOpacity={0.3}
+                  strokeWidth={4}
+                />
+              );
             })}
             {todayPosts.map((post, i) => {
               const d = new Date(post.scheduledFor!);
@@ -141,6 +169,8 @@ export function TheDial({
                   cy={p.y}
                   r={5}
                   fill="var(--aurora-violet)"
+                  stroke="var(--bg)"
+                  strokeWidth={1.5}
                 />
               );
             })}
@@ -283,16 +313,19 @@ export function TheDial({
 
 function NowHand() {
   const d = new Date();
-  const p = polar(100, ((d.getHours() + d.getMinutes() / 60) / 24) * 360, 82);
+  const p = polar(100, ((d.getHours() + d.getMinutes() / 60) / 24) * 360, 80);
   return (
-    <line
-      x1="100"
-      y1="100"
-      x2={p.x}
-      y2={p.y}
-      stroke="var(--aurora-teal)"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
+    <g>
+      <line
+        x1="100"
+        y1="100"
+        x2={p.x}
+        y2={p.y}
+        stroke="var(--aurora-teal)"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <circle cx="100" cy="100" r="3" fill="var(--aurora-teal)" />
+    </g>
   );
 }
