@@ -22,12 +22,29 @@ interface DateTimePickerProps {
   label?: string;
 }
 
+// Rough height of the open popup (month grid + time dial + padding). Used to
+// decide whether it has room to drop down or needs to open upward instead.
+const POPUP_HEIGHT = 440;
+
 /** Date and time picker: a month grid paired with an orrery style 24 hour dial. */
 export function DateTimePicker({ value, onChange, minDate, className, label }: DateTimePickerProps) {
   const [open, setOpen] = useState(false);
+  const [placement, setPlacement] = useState<"down" | "up">("down");
   const [view, setView] = useState(() => startOfMonth(value ?? new Date()));
   const rootRef = useRef<HTMLDivElement>(null);
   const current = value ?? new Date();
+
+  function toggleOpen() {
+    if (!open) {
+      const rect = rootRef.current?.getBoundingClientRect();
+      if (rect) {
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        setPlacement(spaceBelow < POPUP_HEIGHT && spaceAbove > spaceBelow ? "up" : "down");
+      }
+    }
+    setOpen((o) => !o);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -71,7 +88,7 @@ export function DateTimePicker({ value, onChange, minDate, className, label }: D
       ) : null}
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggleOpen}
         className="flex h-10 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-raise)] px-3 text-sm transition-colors hover:border-[var(--border-strong)]"
       >
         <span className={cn(value ? "text-[var(--foreground)]" : "text-[var(--faint-foreground)]")}>
@@ -83,14 +100,18 @@ export function DateTimePicker({ value, onChange, minDate, className, label }: D
       <AnimatePresence>
         {open ? (
           <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            initial={{ opacity: 0, y: placement === "up" ? 6 : -6, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            exit={{ opacity: 0, y: placement === "up" ? 6 : -6, scale: 0.98 }}
             transition={{ type: "spring", stiffness: 440, damping: 32 }}
             /* Solid background, not .glass: this floats directly over page
                content with no dimming backdrop, so a translucent panel let
-               the text behind it show through. */
-            className="absolute z-50 mt-1.5 w-[320px] rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-solid)] p-3 shadow-[var(--glow)]"
+               the text behind it show through. Flips to open upward
+               (placement === "up") when there isn't room below it. */
+            className={cn(
+              "absolute z-50 max-h-[calc(100vh-2rem)] w-[320px] overflow-y-auto rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-solid)] p-3 shadow-[var(--glow)]",
+              placement === "up" ? "bottom-full mb-1.5" : "top-full mt-1.5",
+            )}
           >
             <div className="mb-2 flex items-center justify-between">
               <button

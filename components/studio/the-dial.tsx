@@ -23,6 +23,30 @@ function polar(center: number, degrees: number, radius: number) {
   };
 }
 
+/**
+ * Hour of day (with a fractional minute component), read in a specific IANA
+ * timezone rather than the browser's local one. The golden windows on the
+ * dial are computed server side in the account's timezone, so anything
+ * placed against them (the now hand, today's post markers) has to agree or
+ * it visibly points at the wrong spot.
+ */
+function hourInZone(date: Date, timezone: string): number {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      hourCycle: "h23",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).formatToParts(date);
+    const hour = Number(parts.find((p) => p.type === "hour")?.value);
+    const minute = Number(parts.find((p) => p.type === "minute")?.value);
+    if (Number.isFinite(hour) && Number.isFinite(minute)) return hour + minute / 60;
+  } catch {
+    // Unknown/invalid timezone string: fall through to local time below.
+  }
+  return date.getHours() + date.getMinutes() / 60;
+}
+
 export function TheDial({
   posts,
   goldenWindows,
@@ -157,8 +181,8 @@ export function TheDial({
               );
             })}
             {todayPosts.map((post, i) => {
-              const d = new Date(post.scheduledFor!);
-              const p = polar(100, ((d.getHours() + d.getMinutes() / 60) / 24) * 360, 60);
+              const hour = hourInZone(new Date(post.scheduledFor!), timezone);
+              const p = polar(100, (hour / 24) * 360, 60);
               return (
                 <motion.circle
                   key={post.id}
@@ -174,7 +198,7 @@ export function TheDial({
                 />
               );
             })}
-            {mounted ? <NowHand /> : null}
+            {mounted ? <NowHand timezone={timezone} /> : null}
           </svg>
         </div>
         {todayPosts.length === 0 ? (
@@ -311,9 +335,9 @@ export function TheDial({
   );
 }
 
-function NowHand() {
-  const d = new Date();
-  const p = polar(100, ((d.getHours() + d.getMinutes() / 60) / 24) * 360, 80);
+function NowHand({ timezone }: { timezone: string }) {
+  const hour = hourInZone(new Date(), timezone);
+  const p = polar(100, (hour / 24) * 360, 80);
   return (
     <g>
       <line
